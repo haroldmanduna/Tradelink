@@ -34,7 +34,8 @@ router.post('/jobs/:id/offers', requireAuth, requireRole('tradesperson'), async 
       await client.query('ROLLBACK');
       return res.status(400).json({ error: 'Tradesperson profile missing.' });
     }
-    if (prof.category !== job.category) {
+    // Category must match — except "other" jobs, which any tradesperson may bid on.
+    if (prof.category !== job.category && job.category !== 'other') {
       await client.query('ROLLBACK');
       return res.status(403).json({ error: `You can only bid on ${prof.category} jobs.` });
     }
@@ -156,7 +157,7 @@ router.post('/offers/:id/withdraw', requireAuth, requireRole('tradesperson'), as
 router.get('/offers/mine', requireAuth, requireRole('tradesperson'), async (req, res, next) => {
   try {
     const { rows } = await query(
-      `SELECT o.*, j.description, j.category, j.status AS job_status, j.location, j.budget
+      `SELECT o.*, j.description, j.category, j.custom_category, j.status AS job_status, j.location, j.budget
          FROM offers o JOIN jobs j ON j.id = o.job_id
         WHERE o.tradesperson_id = $1
         ORDER BY o.created_at DESC`,

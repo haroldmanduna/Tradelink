@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { api, CATEGORY_LABELS } from '../api.js';
+import { api, tradeLabel } from '../api.js';
 import { StatusBadge, Empty, Loading, StatBar, money, timeAgo } from '../components.jsx';
 import { TradeIcon, Icon } from '../icons.jsx';
 
@@ -54,7 +54,7 @@ export default function CustomerDashboard() {
             <div className="job-icon"><TradeIcon name={j.category} size={24} /></div>
             <div style={{ flex: 1 }}>
               <div className="flex between wrap">
-                <strong>{CATEGORY_LABELS[j.category]}</strong>
+                <strong>{tradeLabel(j.category, j.custom_category)}</strong>
                 <StatusBadge status={j.status} />
               </div>
               <div className="muted small" style={{ margin: '4px 0 8px' }}>

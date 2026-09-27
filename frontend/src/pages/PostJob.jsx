@@ -6,7 +6,7 @@ import { TradeIcon, Icon } from '../icons.jsx';
 
 export default function PostJob() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ category: 'electrician', description: '', location: 'Bulawayo', budget: '' });
+  const [form, setForm] = useState({ category: 'electrician', customCategory: '', description: '', location: 'Bulawayo', budget: '' });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -19,6 +19,7 @@ export default function PostJob() {
     try {
       const { job } = await api.post('/jobs', {
         category: form.category,
+        custom_category: form.category === 'other' ? form.customCategory : undefined,
         description: form.description,
         location: form.location,
         budget: Number(form.budget),
@@ -51,6 +52,15 @@ export default function PostJob() {
               ))}
             </div>
           </div>
+
+          {form.category === 'other' && (
+            <div className="field">
+              <label>What kind of tradesperson do you need?</label>
+              <input className="input" required value={form.customCategory}
+                onChange={(e) => upd('customCategory', e.target.value)} maxLength={60}
+                placeholder="e.g. Chainsaw sharpener, pool technician, sign writer…" />
+            </div>
+          )}
 
           <div className="field">
             <label>Describe the job</label>

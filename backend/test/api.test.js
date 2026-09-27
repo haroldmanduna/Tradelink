@@ -279,6 +279,34 @@ async function run() {
   r = await api('POST', '/api/support', { body: { name: '', email: '', subject: '', message: '' }});
   assert(r.status === 400, 'support rejects empty fields');
 
+  console.log('\n-- Expanded categories + Other --');
+  r = await api('POST', '/api/auth/register', { body: {
+    role: 'tradesperson', name: 'Tiler Tom', email: `tiler${uniq}@mail.com`,
+    password: 'secret123', location: 'Bulawayo', category: 'tiler' }});
+  assert(r.status === 201 && r.data.user.profile.category === 'tiler', 'register tradesperson with new category (tiler)');
+  r = await api('POST', '/api/jobs', { token: customer.token, body: {
+    category: 'tiler', description: 'Tile a bathroom', location: 'Bulawayo', budget: 90 }});
+  assert(r.status === 201 && r.data.job.category === 'tiler', 'post a tiler job');
+
+  r = await api('POST', '/api/jobs', { token: customer.token, body: {
+    category: 'other', description: 'Need help', location: 'Bulawayo', budget: 30 }});
+  assert(r.status === 400, '"other" job without a custom trade is rejected');
+  r = await api('POST', '/api/jobs', { token: customer.token, body: {
+    category: 'other', custom_category: 'Pool technician', description: 'Service my pool', location: 'Bulawayo', budget: 60 }});
+  assert(r.status === 201 && r.data.job.custom_category === 'Pool technician', 'post an "other" job with a custom trade');
+  const otherJob = r.data.job;
+
+  r = await api('POST', `/api/jobs/${otherJob.id}/offers`, { token: plumber.token, body: { price: 55 }});
+  assert(r.status === 201, 'any tradesperson (plumber) can bid on an "other" job');
+
+  r = await api('GET', '/api/jobs?status=open&category=other', { token: elec1.token });
+  assert(r.status === 200 && r.data.jobs.some((j) => j.id === otherJob.id && j.custom_category === 'Pool technician'),
+    '"other" job surfaces its custom trade when browsing');
+
+  r = await api('GET', '/api/meta/categories');
+  assert(r.data.categories.includes('tiler') && r.data.categories.includes('other') && r.data.categories.length >= 20,
+    'categories list expanded (20+) and includes "other"');
+
   console.log('\n-- Rate limiting --');
   let got429 = false;
   for (let i = 0; i < 20; i++) {

@@ -12,6 +12,7 @@ function shapeJob(r) {
     customer_id: r.customer_id,
     customer_name: r.customer_name,
     category: r.category,
+    custom_category: r.custom_category || null,
     description: r.description,
     location: r.location,
     budget: Number(r.budget),
@@ -29,11 +30,15 @@ function shapeJob(r) {
 // POST /api/jobs  (customer) — post a job
 router.post('/', requireAuth, requireRole('customer'), async (req, res, next) => {
   try {
-    let { category, description, location, budget } = req.body || {};
+    let { category, custom_category, description, location, budget } = req.body || {};
     description = (description || '').trim();
     location = (location || '').trim();
+    custom_category = (custom_category || '').trim().slice(0, 60);
     if (!CATEGORIES.includes(category)) {
       return res.status(400).json({ error: `category must be one of: ${CATEGORIES.join(', ')}.` });
+    }
+    if (category === 'other' && !custom_category) {
+      return res.status(400).json({ error: 'Please describe the type of tradesperson you need.' });
     }
     if (!description) return res.status(400).json({ error: 'Description is required.' });
     if (!location) return res.status(400).json({ error: 'Location is required.' });
@@ -43,9 +48,9 @@ router.post('/', requireAuth, requireRole('customer'), async (req, res, next) =>
     }
 
     const { rows } = await query(
-      `INSERT INTO jobs (customer_id, category, description, location, budget)
-       VALUES ($1,$2,$3,$4,$5) RETURNING *`,
-      [req.user.id, category, description, location, budgetNum]
+      `INSERT INTO jobs (customer_id, category, custom_category, description, location, budget)
+       VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+      [req.user.id, category, category === 'other' ? custom_category : null, description, location, budgetNum]
     );
     return res.status(201).json({ job: shapeJob(rows[0]) });
   } catch (err) {

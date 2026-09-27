@@ -83,6 +83,9 @@ CREATE INDEX IF NOT EXISTS idx_profiles_category ON tradesperson_profiles(catego
 ALTER TABLE jobs ADD COLUMN IF NOT EXISTS worker_marked_done BOOLEAN NOT NULL DEFAULT false;
 ALTER TABLE jobs ADD COLUMN IF NOT EXISTS worker_done_at TIMESTAMPTZ;
 ALTER TABLE jobs ADD COLUMN IF NOT EXISTS completion_note TEXT;
+-- "Other" category: customer types the trade they need
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS custom_category TEXT;
+ALTER TABLE tradesperson_profiles ADD COLUMN IF NOT EXISTS custom_category TEXT;
 
 CREATE TABLE IF NOT EXISTS support_messages (
   id         SERIAL PRIMARY KEY,

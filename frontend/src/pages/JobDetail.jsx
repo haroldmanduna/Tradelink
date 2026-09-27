@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { api, CATEGORY_LABELS } from '../api.js';
+import { api, CATEGORY_LABELS, tradeLabel } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { Stars, StarInput, StatusBadge, Alert, Loading, money, timeAgo } from '../components.jsx';
 import { TradeIcon, Icon } from '../icons.jsx';
@@ -53,7 +53,7 @@ export default function JobDetail() {
           <div className="job-icon"><TradeIcon name={job.category} size={24} /></div>
           <div style={{ flex: 1 }}>
             <div className="flex between wrap">
-              <strong style={{ fontSize: 18 }}>{CATEGORY_LABELS[job.category]}</strong>
+              <strong style={{ fontSize: 18 }}>{tradeLabel(job.category, job.custom_category)}</strong>
               <StatusBadge status={job.status} />
             </div>
             <div className="muted small" style={{ margin: '4px 0 10px' }}>
@@ -185,13 +185,15 @@ function RatingSection({ job, act, busy }) {
 /* -------------------- TRADESPERSON -------------------- */
 function TradespersonView({ job, user, act, busy }) {
   const mine = (job.offers || []).find((o) => o.tradesperson_id === user.id);
-  const canBid = job.status === 'open' && user.profile && user.profile.category === job.category;
+  const isOtherJob = job.category === 'other';
+  const canBid = job.status === 'open' && user.profile && (user.profile.category === job.category || isOtherJob);
   const isAssigned = mine && mine.status === 'accepted';
   const [price, setPrice] = useState('');
   const [message, setMessage] = useState('');
 
-  if (user.profile && user.profile.category !== job.category) {
-    return <div className="card"><p className="muted">This is a {CATEGORY_LABELS[job.category]} job — outside your trade ({CATEGORY_LABELS[user.profile.category]}).</p></div>;
+  // Block only when it's a specific trade outside the pro's category ("other" jobs are open to all).
+  if (user.profile && user.profile.category !== job.category && !isOtherJob && !mine) {
+    return <div className="card"><p className="muted">This is a {tradeLabel(job.category, job.custom_category)} job — outside your trade ({CATEGORY_LABELS[user.profile.category]}).</p></div>;
   }
 
   const statusMsg = mine

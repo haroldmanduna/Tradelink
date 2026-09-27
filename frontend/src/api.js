@@ -51,6 +51,33 @@ export const CATEGORY_LABELS = {
   painter: 'Painter',
   welder: 'Welder',
   builder: 'Builder',
+  tiler: 'Tiler',
+  roofer: 'Roofer',
+  plasterer: 'Plasterer',
+  landscaper: 'Gardener / Landscaper',
+  ac_technician: 'Fridge & AC Tech',
+  solar: 'Solar Installer',
+  borehole: 'Borehole & Pumps',
+  appliance_repair: 'Appliance Repair',
+  locksmith: 'Locksmith',
+  glazier: 'Glass & Windows',
+  pest_control: 'Pest Control',
+  cleaner: 'Cleaning Services',
+  movers: 'Movers & Removals',
+  it_tech: 'Computer & IT',
+  security_installer: 'CCTV & Security',
+  satellite: 'DSTV & Satellite',
+  generator_tech: 'Generator Tech',
+  tailor: 'Tailor & Upholstery',
+  panel_beater: 'Panel Beater & Spray',
+  tow_truck: 'Tow Truck',
+  other: 'Other',
 };
+
+// Display label that respects a customer's free-typed "Other" trade.
+export function tradeLabel(category, custom) {
+  if (category === 'other') return custom && custom.trim() ? custom : 'Other';
+  return CATEGORY_LABELS[category] || category;
+}
 
 

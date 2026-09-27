@@ -54,6 +54,155 @@ const TRADE_PATHS = {
       <path d="M3 13h18M9 13v8M15 13v8M3 17h18" {...S} />
     </>
   ),
+  tiler: (
+    <>
+      <rect x="4" y="4" width="16" height="16" rx="1" {...S} />
+      <path d="M4 10h16M4 15h16M9.5 4v16M14.5 4v16" {...S} />
+    </>
+  ),
+  roofer: (
+    <>
+      <path d="M2 12 12 5l10 7" {...S} />
+      <path d="M4.5 11 12 6.5 19.5 11" {...S} />
+      <path d="M6 13v6h12v-6" {...S} />
+    </>
+  ),
+  plasterer: (
+    <>
+      <path d="M4 13 13 4a2 2 0 0 1 3 3L7 16Z" {...S} />
+      <path d="M7 16l-3 3" {...S} />
+      <path d="M14 6l4 4" {...S} />
+    </>
+  ),
+  landscaper: (
+    <>
+      <path d="M12 21v-7" {...S} />
+      <path d="M12 14c-4 0-6-2-6-6 4 0 6 2 6 6Z" {...S} />
+      <path d="M12 12c0-3 2-5 5-5 0 3-2 5-5 5Z" {...S} />
+    </>
+  ),
+  ac_technician: (
+    <>
+      <path d="M12 2v20M2 12h20" {...S} />
+      <path d="M5 5l14 14M19 5 5 19" {...S} />
+      <path d="M12 5.5 10 4M12 5.5 14 4M12 18.5 10 20M12 18.5 14 20" {...S} />
+    </>
+  ),
+  solar: (
+    <>
+      <rect x="3" y="13" width="18" height="7" rx="1" {...S} />
+      <path d="M7.5 13v7M12 13v7M16.5 13v7M3 16.5h18" {...S} />
+      <circle cx="12" cy="6" r="2.5" {...S} />
+      <path d="M12 1v1.5M6.5 6H5M19 6h-1.5M8.4 2.4l1 1M15.6 2.4l-1 1" {...S} />
+    </>
+  ),
+  borehole: (
+    <>
+      <path d="M12 3c3.2 4 5 6.6 5 9a5 5 0 0 1-10 0c0-2.4 1.8-5 5-9Z" {...S} />
+      <path d="M9.5 13.5a2.5 2.5 0 0 0 2.5 2.5" {...S} />
+    </>
+  ),
+  appliance_repair: (
+    <>
+      <rect x="5" y="3" width="14" height="18" rx="2" {...S} />
+      <path d="M9 3v18" {...S} />
+      <path d="M7 6.5v1M7 10v1" {...S} />
+    </>
+  ),
+  locksmith: (
+    <>
+      <rect x="5" y="11" width="14" height="9" rx="2" {...S} />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" {...S} />
+      <circle cx="12" cy="15.5" r="1.3" {...S} />
+    </>
+  ),
+  glazier: (
+    <>
+      <rect x="4" y="3" width="16" height="18" rx="1" {...S} />
+      <path d="M12 3v18M4 12h16" {...S} />
+    </>
+  ),
+  pest_control: (
+    <>
+      <path d="M12 8c2.4 0 4 2.2 4 5s-1.6 5-4 5-4-2.2-4-5 1.6-5 4-5Z" {...S} />
+      <path d="M12 4.5V8M9.5 5.5 8 4M14.5 5.5 16 4" {...S} />
+      <path d="M8 12H4M20 12h-4M8 16H4.5M19.5 16H16" {...S} />
+    </>
+  ),
+  cleaner: (
+    <>
+      <path d="M10 8h5l1.5 3v10H10z" {...S} />
+      <path d="M10 8V5h3V4h2v4" {...S} />
+      <path d="M18 5h2M18 8h2M18 11h2" {...S} />
+    </>
+  ),
+  movers: (
+    <>
+      <path d="M3 8 12 4l9 4-9 4Z" {...S} />
+      <path d="M3 8v8l9 4 9-4V8" {...S} />
+      <path d="M12 12v8" {...S} />
+    </>
+  ),
+  it_tech: (
+    <>
+      <rect x="3" y="4" width="18" height="12" rx="1.5" {...S} />
+      <path d="M2 20h20M9 16l-.7 4M15 16l.7 4" {...S} />
+    </>
+  ),
+  security_installer: (
+    <>
+      <path d="M3 7.5 16.5 4l1.2 4.2L4.2 11.7Z" {...S} />
+      <path d="M5.5 11 4 15.5" {...S} />
+      <path d="M17.7 7 21 8.6" {...S} />
+      <circle cx="8" cy="8.5" r="1" {...S} />
+    </>
+  ),
+  satellite: (
+    <>
+      <circle cx="6" cy="18" r="1.6" {...S} />
+      <path d="M4.5 14a5.5 5.5 0 0 1 5.5 5.5" {...S} />
+      <path d="M4.5 9.5A10 10 0 0 1 14.5 19.5" {...S} />
+      <path d="M4.5 5a15 15 0 0 1 15 15" {...S} />
+    </>
+  ),
+  generator_tech: (
+    <>
+      <rect x="3" y="8" width="18" height="10" rx="2" {...S} />
+      <path d="M7 8V6h5" {...S} />
+      <path d="M6 13h3l1.5-2.5L12 15l1.5-2h3" {...S} />
+    </>
+  ),
+  tailor: (
+    <>
+      <circle cx="6" cy="6" r="2.4" {...S} />
+      <circle cx="6" cy="18" r="2.4" {...S} />
+      <path d="M8 7.5 20 18M8 16.5 20 6" {...S} />
+    </>
+  ),
+  panel_beater: (
+    <>
+      <path d="M3 13l2.2-5.5a2 2 0 0 1 1.9-1.3h9.8a2 2 0 0 1 1.9 1.3L21 13" {...S} />
+      <path d="M3 13h18v4H3z" {...S} />
+      <circle cx="7" cy="17.5" r="1.4" {...S} />
+      <circle cx="17" cy="17.5" r="1.4" {...S} />
+    </>
+  ),
+  tow_truck: (
+    <>
+      <path d="M3 16V8h8v8" {...S} />
+      <path d="M11 11h4l4 3v2h-8" {...S} />
+      <circle cx="6.5" cy="17.5" r="1.5" {...S} />
+      <circle cx="16.5" cy="17.5" r="1.5" {...S} />
+      <path d="M14 5l4 3" {...S} />
+    </>
+  ),
+  other: (
+    <>
+      <circle cx="5.5" cy="12" r="1.5" {...S} />
+      <circle cx="12" cy="12" r="1.5" {...S} />
+      <circle cx="18.5" cy="12" r="1.5" {...S} />
+    </>
+  ),
 };
 
 export function TradeIcon({ name, size = 22, className }) {

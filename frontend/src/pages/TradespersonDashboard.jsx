@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api, CATEGORY_LABELS } from '../api.js';
+import { api, CATEGORY_LABELS, tradeLabel } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { Stars, StatusBadge, Empty, Loading, StatBar, Alert, money, timeAgo } from '../components.jsx';
 import { TradeIcon, Icon } from '../icons.jsx';
@@ -126,8 +126,11 @@ function OpenJobs({ myCategory }) {
       </div>
 
       {error && <div className="alert error">{error}</div>}
-      {category !== myCategory && (
-        <div className="alert info">You can browse any category, but you can only send offers on <strong>{CATEGORY_LABELS[myCategory]}</strong> jobs.</div>
+      {category === 'other' && (
+        <div className="alert info">“Other” jobs are open to every tradesperson — feel free to send an offer if you can help.</div>
+      )}
+      {category !== myCategory && category !== 'other' && (
+        <div className="alert info">You can browse any category, but you can only send offers on <strong>{CATEGORY_LABELS[myCategory]}</strong> and <strong>Other</strong> jobs.</div>
       )}
       {jobs === null && <Loading />}
       {jobs && jobs.length === 0 && (
@@ -140,7 +143,7 @@ function OpenJobs({ myCategory }) {
             <div className="job-icon"><TradeIcon name={j.category} size={24} /></div>
             <div style={{ flex: 1 }}>
               <div className="flex between wrap">
-                <strong>{CATEGORY_LABELS[j.category]} · {j.location}</strong>
+                <strong>{tradeLabel(j.category, j.custom_category)} · {j.location}</strong>
                 <span className="price">{money(j.budget)}</span>
               </div>
               <div className="muted small" style={{ margin: '4px 0 8px' }}>
@@ -189,7 +192,7 @@ function MyOffers() {
     <div key={o.id} className="card tap" onClick={() => navigate(`/jobs/${o.job_id}`)}>
       <div className="flex between wrap">
         <div>
-          <strong>{CATEGORY_LABELS[o.category]} · {o.location}</strong>
+          <strong>{tradeLabel(o.category, o.custom_category)} · {o.location}</strong>
           <div className="muted small">{o.description}</div>
         </div>
         <div style={{ textAlign: 'right' }}>
@@ -227,7 +230,7 @@ function AssignedJobs() {
         <div className="job-icon"><TradeIcon name={j.category} size={24} /></div>
         <div style={{ flex: 1 }}>
           <div className="flex between wrap">
-            <strong>{CATEGORY_LABELS[j.category]} · {j.location}</strong>
+            <strong>{tradeLabel(j.category, j.custom_category)} · {j.location}</strong>
             <StatusBadge status={j.status} />
           </div>
           <div className="muted small" style={{ margin: '4px 0 8px' }}>
