@@ -1,4 +1,4 @@
-// End-to-end API test for TradeLink. Run against a live server.
+// End-to-end API test for Trustade. Run against a live server.
 // Usage: BASE=http://localhost:3000 node test/api.test.js
 const BASE = process.env.BASE || 'http://localhost:3000';
 
@@ -33,7 +33,7 @@ async function api(method, path, { token, body } = {}) {
 const uniq = Date.now();
 
 async function run() {
-  console.log('\n=== TradeLink API E2E tests ===\n');
+  console.log('\n=== Trustade API E2E tests ===\n');
 
   // Health
   let r = await api('GET', '/api/health');

@@ -1,7 +1,7 @@
 {
-  "name": "tradelink-backend",
+  "name": "trustade-backend",
   "version": "1.0.0",
-  "description": "TradeLink backend - two-sided tradesperson marketplace",
+  "description": "Trustade backend - two-sided tradesperson marketplace",
   "type": "commonjs",
   "main": "src/index.js",
   "scripts": {

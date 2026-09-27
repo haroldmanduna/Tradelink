@@ -120,7 +120,7 @@ function Nav() {
     <nav className={`nav ${onDark ? 'on-dark' : ''}`}>
       <Link to="/" className="brand">
         <Logo size={30} />
-        <span>Trade<span className="accent">Link</span></span>
+        <span>Trust<span className="accent">ade</span></span>
       </Link>
       <div className="nav-right">
         {user ? (
@@ -153,7 +153,7 @@ function Footer() {
     <footer className="site-footer">
       <div className="inner">
         <div>
-          <Link to="/" className="brand"><Logo size={26} /> <span>Trade<span className="accent">Link</span></span></Link>
+          <Link to="/" className="brand"><Logo size={26} /> <span>Trust<span className="accent">ade</span></span></Link>
           <p className="tag">Trusted local tradespeople across Zimbabwe.</p>
         </div>
         <div className="cols">
@@ -177,7 +177,7 @@ function Footer() {
         </div>
       </div>
       <div className="legal">
-        <span>© {year} TradeLink. All rights reserved.</span>
+        <span>© {year} Trustade. All rights reserved.</span>
         <span>Payment is arranged directly between customer and tradesperson.</span>
       </div>
     </footer>
@@ -203,6 +203,70 @@ function CookieBanner() {
       <div className="acts">
         <button className="btn secondary sm" onClick={() => decide('essential')}>Essential only</button>
         <button className="btn sm" onClick={() => decide('all')}>Accept</button>
+      </div>
+    </div>
+  );
+}
+
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function InstallPrompt() {
+  const [deferred, setDeferred] = useState(null);
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    if (isStandalone() || localStorage.getItem('tl_pwa_installed')) return;
+
+    function onBeforeInstall(e) {
+      e.preventDefault();
+      setDeferred(e);
+      // Only nudge once the user has dealt with the cookie notice, and not if
+      // they recently dismissed this prompt.
+      const snoozed = Number(localStorage.getItem('tl_install_snoozed') || 0);
+      const recentlySnoozed = Date.now() - snoozed < 7 * 24 * 60 * 60 * 1000;
+      if (!recentlySnoozed) setShow(true);
+    }
+    function onInstalled() {
+      localStorage.setItem('tl_pwa_installed', '1');
+      setShow(false);
+      setDeferred(null);
+    }
+    window.addEventListener('beforeinstallprompt', onBeforeInstall);
+    window.addEventListener('appinstalled', onInstalled);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onBeforeInstall);
+      window.removeEventListener('appinstalled', onInstalled);
+    };
+  }, []);
+
+  async function install() {
+    if (!deferred) return;
+    deferred.prompt();
+    try { await deferred.userChoice; } catch (_) { /* ignore */ }
+    setShow(false);
+    setDeferred(null);
+  }
+
+  function snooze() {
+    localStorage.setItem('tl_install_snoozed', String(Date.now()));
+    setShow(false);
+  }
+
+  if (!show) return null;
+  return (
+    <div className="install-card" role="dialog" aria-label="Install Trustade">
+      <div className="install-ico"><Logo size={40} /></div>
+      <div className="install-copy">
+        <strong>Install the Trustade app</strong>
+        <span>Add Trustade to your home screen for one-tap access and instant job alerts.</span>
+      </div>
+      <div className="install-acts">
+        <button className="btn ghost sm" onClick={snooze}>Not now</button>
+        <button className="btn sm" onClick={install}>
+          <Icon name="plus" size={15} /> Install app
+        </button>
       </div>
     </div>
   );
@@ -248,6 +312,7 @@ export default function App() {
         </Routes>
       </div>
       <Footer />
+      <InstallPrompt />
       <CookieBanner />
     </>
   );

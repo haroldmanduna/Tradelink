@@ -1,4 +1,4 @@
-// Paynow integration client for TradeLink.
+// Paynow integration client for Trustade.
 // Docs: https://developers.paynow.co.zw/docs/paynow/
 //
 // Handles: hash generation/verification, web (redirect) initiation,
@@ -135,7 +135,7 @@ async function initiateExpress(params) {
     ['phone', params.phone || ''],
   ];
   // authemail is required for express — ensure present.
-  const body = buildInitiateBody({ ...params, authemail: params.authemail || 'noreply@tradelink.co.zw' }, extra);
+  const body = buildInitiateBody({ ...params, authemail: params.authemail || 'noreply@trustade.co.zw' }, extra);
   const fields = await postForm(REMOTE_URL, body);
   const status = (getField(fields, 'status') || '').toLowerCase();
   if (status !== 'ok') {

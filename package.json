@@ -1,7 +1,7 @@
 {
-  "name": "tradelink",
+  "name": "trustade",
   "version": "1.0.0",
-  "description": "TradeLink — two-sided marketplace connecting customers with local tradespeople in Bulawayo & Zvishavane, Zimbabwe.",
+  "description": "Trustade — two-sided marketplace connecting customers with local tradespeople in Bulawayo & Zvishavane, Zimbabwe.",
   "private": true,
   "scripts": {
     "build": "cd frontend && npm install && npm run build && cd ../backend && npm install",

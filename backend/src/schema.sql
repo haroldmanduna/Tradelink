@@ -1,4 +1,4 @@
--- TradeLink schema (idempotent)
+-- Trustade schema (idempotent)
 
 CREATE TABLE IF NOT EXISTS users (
   id           SERIAL PRIMARY KEY,

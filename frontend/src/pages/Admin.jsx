@@ -353,8 +353,8 @@ function ConfirmModal({ pending, busy, onCancel, onConfirm }) {
   if (!pending) return null;
   const { user: u, action } = pending;
   const meta = {
-    suspend:        { title: `Suspend ${u.name}?`,          body: 'They will be signed out and blocked from using TradeLink until you un-suspend them.', cta: 'Suspend',      danger: true, reason: true },
-    unsuspend:      { title: `Un-suspend ${u.name}?`,       body: 'They will be able to log in and use TradeLink again.',                                cta: 'Un-suspend' },
+    suspend:        { title: `Suspend ${u.name}?`,          body: 'They will be signed out and blocked from using Trustade until you un-suspend them.', cta: 'Suspend',      danger: true, reason: true },
+    unsuspend:      { title: `Un-suspend ${u.name}?`,       body: 'They will be able to log in and use Trustade again.',                                cta: 'Un-suspend' },
     'make-admin':   { title: `Make ${u.name} an admin?`,    body: 'They will get access to the admin console and can manage users and complaints.',       cta: 'Make admin' },
     'revoke-admin': { title: `Remove admin from ${u.name}?`,body: 'They will lose admin access and return to a normal account.',                          cta: 'Remove admin', danger: true },
   }[action];

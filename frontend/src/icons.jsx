@@ -255,11 +255,13 @@ export function Icon({ name, size = 18, className, style, ...rest }) {
 export function Logo({ size = 30 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
-      <rect width="32" height="32" rx="9" fill="url(#tlg)" />
-      <path d="M10 9.5 9 22M10 9.5l4 4M22 9.5 23 22M22 9.5l-4 4M13.5 13.5h5M12.5 22h7"
-        fill="none" stroke="#fff" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+      <rect width="32" height="32" rx="9" fill="url(#tsg)" />
+      <path d="M16 5.6 24 8.8V14.6C24 19.7 20.4 23.6 16 26 11.6 23.6 8 19.7 8 14.6V8.8L16 5.6Z"
+        fill="none" stroke="#fff" strokeWidth="1.9" strokeLinejoin="round" />
+      <path d="M12 15.4 14.9 18.3 20.4 12.4"
+        fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       <defs>
-        <linearGradient id="tlg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+        <linearGradient id="tsg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
           <stop stopColor="#FF7A1A" />
           <stop offset="1" stopColor="#F0510E" />
         </linearGradient>

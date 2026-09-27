@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { query } = require('./db');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'tradelink-dev-secret-change-me';
+const JWT_SECRET = process.env.JWT_SECRET || 'trustade-dev-secret-change-me';
 const TOKEN_TTL = '30d';
 
 function signToken(user) {

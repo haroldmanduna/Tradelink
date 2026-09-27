@@ -124,7 +124,7 @@ export default function Auth({ mode }) {
       <div className="card auth-card">
         <h1 className="h1">{isRegister ? 'Create your account' : 'Welcome back'}</h1>
         <p className="sub">
-          {isRegister ? 'Join TradeLink in under a minute.' : 'Log in to manage your jobs and offers.'}
+          {isRegister ? 'Join Trustade in under a minute.' : 'Log in to manage your jobs and offers.'}
         </p>
 
         <Alert kind="error">{error}</Alert>
@@ -216,7 +216,7 @@ export default function Auth({ mode }) {
           {isRegister ? (
             <>Already have an account? <Link to="/login">Log in</Link></>
           ) : (
-            <>New to TradeLink? <Link to="/register">Create an account</Link></>
+            <>New to Trustade? <Link to="/register">Create an account</Link></>
           )}
         </p>
       </div>

@@ -1,4 +1,4 @@
-# TradeLink
+# Trustade
 
 A two-sided marketplace connecting customers with local tradespeople (electricians, plumbers, mechanics, handymen and more) in **Bulawayo & Zvishavane, Zimbabwe**. Built around an inDrive-style bidding model.
 

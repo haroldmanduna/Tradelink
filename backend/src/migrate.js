@@ -7,7 +7,7 @@ async function migrate() {
   const client = await pool.connect();
   try {
     await client.query(sql);
-    console.log('✔ Migration complete — TradeLink schema is ready.');
+    console.log('✔ Migration complete — Trustade schema is ready.');
   } finally {
     client.release();
   }

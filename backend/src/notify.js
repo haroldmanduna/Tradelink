@@ -5,7 +5,7 @@ const { CATEGORY_LABELS } = require('./constants');
 // --- Web Push setup (VAPID) -------------------------------------------------
 const VAPID_PUBLIC = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY;
-const VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'mailto:admin@tradelink.co.zw';
+const VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'mailto:admin@trustade.co.zw';
 let pushEnabled = false;
 if (VAPID_PUBLIC && VAPID_PRIVATE) {
   try { webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE); pushEnabled = true; }

@@ -111,9 +111,9 @@ router.post('/wallet/topup', requireAuth, async (req, res, next) => {
 
     const initParams = {
       reference, amount,
-      additionalinfo: `TradeLink ${bundle.credits} credits (${bundle.label})`,
+      additionalinfo: `Trustade ${bundle.credits} credits (${bundle.label})`,
       returnurl, resulturl,
-      authemail: req.user.email || 'noreply@tradelink.co.zw',
+      authemail: req.user.email || 'noreply@trustade.co.zw',
     };
 
     let result;

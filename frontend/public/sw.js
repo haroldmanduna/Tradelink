@@ -1,11 +1,11 @@
-/* TradeLink service worker — Web Push notifications. */
+/* Trustade service worker — Web Push notifications. */
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
 
 self.addEventListener('push', (event) => {
   let data = {};
   try { data = event.data ? event.data.json() : {}; } catch (e) { data = {}; }
-  const title = data.title || 'TradeLink';
+  const title = data.title || 'Trustade';
   const options = {
     body: data.body || '',
     icon: '/icon-192.png',

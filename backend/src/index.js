@@ -30,7 +30,7 @@ app.use('/api/auth', authLimiter);    // stricter cap on auth endpoints
 app.use('/api/support', writeLimiter);
 
 // --- API routes ---
-app.get('/api/health', (req, res) => res.json({ ok: true, service: 'tradelink', time: new Date().toISOString() }));
+app.get('/api/health', (req, res) => res.json({ ok: true, service: 'trustade', time: new Date().toISOString() }));
 app.get('/api/meta/categories', (req, res) => res.json({ categories: CATEGORIES }));
 // Public runtime config for the frontend (e.g. Google sign-in client id).
 app.get('/api/meta/config', (req, res) => res.json({
@@ -75,7 +75,7 @@ async function start() {
       await seedAdmin();
     }
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`TradeLink API listening on 0.0.0.0:${PORT}`);
+      console.log(`Trustade API listening on 0.0.0.0:${PORT}`);
     });
   } catch (err) {
     console.error('Failed to start:', err.message);

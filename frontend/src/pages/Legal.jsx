@@ -24,13 +24,13 @@ function Layout({ title, children }) {
 export function Terms() {
   return (
     <Layout title="Terms & Conditions">
-      <p>Welcome to TradeLink. These Terms &amp; Conditions ("Terms") govern your use of the TradeLink
+      <p>Welcome to Trustade. These Terms &amp; Conditions ("Terms") govern your use of the Trustade
         platform ("Platform"), which connects customers with independent tradespeople across
         Zimbabwe. By creating an account or using the Platform, you agree to these Terms.</p>
 
-      <h2>1. What TradeLink is</h2>
-      <p>TradeLink is a marketplace that helps customers post jobs and receive offers from tradespeople.
-        TradeLink is <strong>not</strong> a party to any agreement between a customer and a tradesperson. We do
+      <h2>1. What Trustade is</h2>
+      <p>Trustade is a marketplace that helps customers post jobs and receive offers from tradespeople.
+        Trustade is <strong>not</strong> a party to any agreement between a customer and a tradesperson. We do
         not employ tradespeople, do not perform the work, and do not guarantee the quality, safety or
         legality of any job. Tradespeople are independent contractors.</p>
 
@@ -49,7 +49,7 @@ export function Terms() {
       </ul>
 
       <h2>4. Payments</h2>
-      <p>In this version of TradeLink, <strong>no payments are processed on the Platform</strong>. All payment
+      <p>In this version of Trustade, <strong>no payments are processed on the Platform</strong>. All payment
         is arranged and made directly between the customer and the tradesperson. Any commission or service
         fee arrangement will be communicated to you and, where introduced, will be governed by an updated
         version of these Terms.</p>
@@ -62,7 +62,7 @@ export function Terms() {
       </ul>
 
       <h2>6. Disclaimers &amp; liability</h2>
-      <p>The Platform is provided "as is". To the maximum extent permitted by law, TradeLink is not liable
+      <p>The Platform is provided "as is". To the maximum extent permitted by law, Trustade is not liable
         for the acts or omissions of any customer or tradesperson, for the quality or outcome of any job, or
         for any loss arising from arrangements made through the Platform. You use the Platform at your own risk
         and are responsible for verifying credentials and agreeing scope, price and safety with the other party.</p>
@@ -80,7 +80,7 @@ export function Terms() {
 export function Privacy() {
   return (
     <Layout title="Privacy Policy">
-      <p>This Privacy Policy explains what personal information TradeLink collects, how we use it, and your
+      <p>This Privacy Policy explains what personal information Trustade collects, how we use it, and your
         rights. It applies to everyone who uses the Platform in Zimbabwe.</p>
 
       <h2>1. Information we collect</h2>
@@ -122,7 +122,7 @@ export function Privacy() {
 export function Cookies() {
   return (
     <Layout title="Cookie Policy">
-      <p>This Cookie Policy explains how TradeLink uses cookies and similar local-storage technologies.</p>
+      <p>This Cookie Policy explains how Trustade uses cookies and similar local-storage technologies.</p>
 
       <h2>1. What we use</h2>
       <ul>
@@ -132,7 +132,7 @@ export function Cookies() {
       </ul>
 
       <h2>2. What we do not use</h2>
-      <p>TradeLink v1 does not use third-party advertising cookies or cross-site tracking. We do not sell your data.</p>
+      <p>Trustade v1 does not use third-party advertising cookies or cross-site tracking. We do not sell your data.</p>
 
       <h2>3. Managing cookies</h2>
       <p>You can clear cookies and local storage at any time through your browser settings. Doing so will sign you

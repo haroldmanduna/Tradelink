@@ -6,10 +6,10 @@ import { Alert } from '../components.jsx';
 import { Icon } from '../icons.jsx';
 
 const FAQS = [
-  { q: 'How much does TradeLink cost?', a: 'Posting a job and receiving offers is free in v1. Payment for the work itself is arranged directly between you and the tradesperson.' },
+  { q: 'How much does Trustade cost?', a: 'Posting a job and receiving offers is free in v1. Payment for the work itself is arranged directly between you and the tradesperson.' },
   { q: 'How do I get paid / pay?', a: 'Payment happens off-platform for now — cash, bank transfer or mobile money, agreed directly between the customer and tradesperson once an offer is accepted.' },
   { q: 'What if a tradesperson does poor work?', a: 'Rate the tradesperson honestly after completion. Ratings help the whole community choose well. You can also contact us below.' },
-  { q: 'How do I become verified?', a: 'Verification is granted by the TradeLink team. Complete jobs and build up genuine ratings, then reach out via this form.' },
+  { q: 'How do I become verified?', a: 'Verification is granted by the Trustade team. Complete jobs and build up genuine ratings, then reach out via this form.' },
 ];
 
 export default function Support() {

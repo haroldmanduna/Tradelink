@@ -1,4 +1,4 @@
-// Shared constants for TradeLink.
+// Shared constants for Trustade.
 
 const CATEGORIES = [
   'electrician',

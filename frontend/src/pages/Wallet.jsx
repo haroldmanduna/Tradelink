@@ -96,7 +96,7 @@ export default function Wallet() {
 
       {!data.billingEnabled && (
         <Alert kind="success">
-          <strong>Launch offer:</strong> TradeLink is <strong>free right now</strong> — you don&rsquo;t need credits to
+          <strong>Launch offer:</strong> Trustade is <strong>free right now</strong> — you don&rsquo;t need credits to
           send offers or win jobs. Top up any time to be ready for when fees begin (we&rsquo;ll give plenty of notice).
         </Alert>
       )}
