@@ -1,0 +1,25 @@
+# ── Trustade external keep-alive (OPTIONAL backup) ────────────────────────────
+# The app already self-pings to stay awake. This adds an EXTERNAL wake-up too.
+# To enable: in GitHub, create a file at  .github/workflows/keepalive.yml
+# with this content (Add file → Create new file in the web UI — no token needed).
+name: Keep Trustade warm
+on:
+  schedule:
+    - cron: "*/14 * * * *"
+  workflow_dispatch: {}
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Ping health endpoint
+        run: |
+          URL="https://trustade.onrender.com/api/health"
+          for i in 1 2 3; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 90 "$URL" || echo 000)
+            echo "attempt $i -> HTTP $code"
+            if [ "$code" = "200" ]; then echo "site is awake"; exit 0; fi
+            sleep 25
+          done
+          echo "did not get 200 (site may be waking); not failing the job"
+          exit 0

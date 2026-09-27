@@ -68,6 +68,33 @@ app.use((err, req, res, next) => {
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 
+// Keep the free-tier instance warm so it doesn't spin down from inactivity
+// (Render free web services sleep after ~15 min without inbound traffic, which
+// causes a slow cold start on the next visit). We periodically hit our own
+// public health endpoint — that counts as inbound traffic and resets the idle
+// timer. RENDER_EXTERNAL_URL is injected automatically by Render in production.
+// Controls: KEEPALIVE=off disables it; KEEPALIVE_HOURS="5-23" limits pinging to
+// an active window in CAT (UTC+2) to conserve free monthly hours.
+function setupKeepAlive() {
+  const base = process.env.SELF_PING_URL || process.env.RENDER_EXTERNAL_URL;
+  if (!base || process.env.KEEPALIVE === 'off' || typeof fetch !== 'function') return;
+  const INTERVAL_MS = 14 * 60 * 1000; // just under Render's ~15 min idle window
+  const m = (process.env.KEEPALIVE_HOURS || '').match(/^(\d{1,2})-(\d{1,2})$/);
+  const start = m ? +m[1] : null;
+  const end = m ? +m[2] : null;
+  const inWindow = () => {
+    if (start === null) return true;
+    const h = (new Date().getUTCHours() + 2) % 24; // CAT = UTC+2
+    return start <= end ? (h >= start && h < end) : (h >= start || h < end);
+  };
+  const url = base.replace(/\/$/, '') + '/api/health';
+  setInterval(() => {
+    if (!inWindow()) return;
+    fetch(url).then(() => {}).catch(() => {});
+  }, INTERVAL_MS);
+  console.log(`Keep-alive enabled -> ${url} ${m ? `(CAT ${start}-${end})` : '(24/7)'}`);
+}
+
 async function start() {
   try {
     if (process.env.SKIP_MIGRATE !== '1') {
@@ -76,6 +103,7 @@ async function start() {
     }
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`Trustade API listening on 0.0.0.0:${PORT}`);
+      setupKeepAlive();
     });
   } catch (err) {
     console.error('Failed to start:', err.message);
