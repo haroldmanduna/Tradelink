@@ -4,12 +4,21 @@ import { useAuth } from './auth.jsx';
 import { Logo, Icon } from './icons.jsx';
 import { Loading } from './components.jsx';
 import Landing from './pages/Landing.jsx';
+
+// Where each role lands after login / on "home".
+function homePath(user) {
+  if (!user) return '/';
+  if (user.role === 'admin') return '/admin';
+  return user.role === 'customer' ? '/customer' : '/pro';
+}
+
 import Auth from './pages/Auth.jsx';
 import CustomerDashboard from './pages/CustomerDashboard.jsx';
 import PostJob from './pages/PostJob.jsx';
 import JobDetail from './pages/JobDetail.jsx';
 import TradespersonDashboard from './pages/TradespersonDashboard.jsx';
 import Wallet from './pages/Wallet.jsx';
+import Admin from './pages/Admin.jsx';
 import Support from './pages/Support.jsx';
 import { Terms, Privacy, Cookies } from './pages/Legal.jsx';
 
@@ -28,10 +37,10 @@ function Nav() {
         {user ? (
           <>
             <span className="nav-user">
-              <strong>{user.name}</strong> · {user.role === 'customer' ? 'Customer' : 'Tradesperson'}
+              <strong>{user.name}</strong> · {user.role === 'customer' ? 'Customer' : user.role === 'admin' ? (user.is_superadmin ? 'Superadmin' : 'Admin') : 'Tradesperson'}
             </span>
-            <Link className="btn secondary sm" to={user.role === 'customer' ? '/customer' : '/pro'}>
-              Dashboard
+            <Link className="btn secondary sm" to={homePath(user)}>
+              {user.role === 'admin' ? 'Admin' : 'Dashboard'}
             </Link>
             <button className="btn ghost sm" onClick={() => { logout(); navigate('/'); }}>
               <Icon name="logout" size={16} /> Log out
@@ -114,7 +123,7 @@ function Protected({ role, children }) {
   if (loading) return <Loading />;
   if (!user) return <Navigate to="/login" replace />;
   if (role && user.role !== role) {
-    return <Navigate to={user.role === 'customer' ? '/customer' : '/pro'} replace />;
+    return <Navigate to={homePath(user)} replace />;
   }
   return children;
 }
@@ -122,7 +131,7 @@ function Protected({ role, children }) {
 function HomeRedirect() {
   const { user, loading } = useAuth();
   if (loading) return <Loading />;
-  if (user) return <Navigate to={user.role === 'customer' ? '/customer' : '/pro'} replace />;
+  if (user) return <Navigate to={homePath(user)} replace />;
   return <Landing />;
 }
 
@@ -140,6 +149,7 @@ export default function App() {
           <Route path="/jobs/:id" element={<Protected><JobDetail /></Protected>} />
           <Route path="/pro" element={<Protected role="tradesperson"><TradespersonDashboard /></Protected>} />
           <Route path="/wallet" element={<Protected role="tradesperson"><Wallet /></Protected>} />
+          <Route path="/admin" element={<Protected role="admin"><Admin /></Protected>} />
           <Route path="/support" element={<Support />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />

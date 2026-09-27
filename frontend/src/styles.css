@@ -412,3 +412,57 @@ svg { display: block; }
 
 .opt { font-weight: 400; color: var(--muted); font-size: 12px; }
 .contact-box a { color: inherit; text-decoration: underline; }
+
+/* -------------------------------------------------------- Admin console -- */
+.admin { max-width: 1100px; }
+.admin-head { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.admin-head .h1 { margin: 6px 0 0; }
+.pw-card { padding: 14px 16px; margin-bottom: 18px; }
+.pw-fields { display: flex; gap: 10px; flex-wrap: wrap; }
+.pw-fields .input { flex: 1; min-width: 180px; }
+
+.admin-metrics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (max-width: 760px){ .admin-metrics { grid-template-columns: 1fr; } }
+.admin-metric { padding: 18px 20px; }
+.am-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 14px; }
+.am-title svg { color: var(--brand); }
+.am-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 8px; }
+.am-cell .am-v { font-family: var(--display); font-weight: 700; font-size: 22px; color: var(--ink-900); line-height: 1.1; }
+.am-cell .am-l { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.admin-filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.admin-search { display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--line-strong); border-radius: 999px; padding: 4px 14px; flex: 1; min-width: 220px; }
+.admin-search svg { color: var(--muted); flex: none; }
+.admin-search .input { border: none; background: none; padding: 8px 0; width: 100%; }
+.admin-search .input:focus { outline: none; box-shadow: none; }
+.chips-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chips-sep { width: 1px; height: 20px; background: var(--line-strong); margin: 0 2px; }
+
+.admin-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); background: var(--card); box-shadow: var(--shadow-sm); }
+.admin-table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 720px; }
+.admin-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 12px 14px; border-bottom: 1px solid var(--line); background: var(--bg-soft); white-space: nowrap; }
+.admin-table td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.admin-table tr:last-child td { border-bottom: none; }
+.admin-table tr.is-suspended { background: #fdf3f2; }
+.u-name { font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: 6px; }
+.u-name .badge { padding: 1px 5px; }
+.u-sub { font-size: 12px; color: var(--muted); }
+.u-sub.locked { display: inline-flex; align-items: center; gap: 5px; color: var(--accent); font-weight: 600; }
+.row-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.row-actions .btn.sm { padding: 6px 10px; font-size: 12px; }
+
+.admin-cards { display: grid; gap: 12px; }
+.admin-review, .admin-complaint { padding: 16px 18px; }
+.ar-top { display: flex; justify-content: space-between; align-items: center; }
+.ar-comment { margin: 10px 0; color: var(--ink-2); line-height: 1.5; }
+.ar-meta { font-size: 13px; }
+.ac-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.ac-subject { font-weight: 700; color: var(--ink); }
+.ac-msg { margin: 10px 0; color: var(--ink-2); line-height: 1.55; white-space: pre-wrap; }
+.ac-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--line); }
+
+.admin-log { display: flex; flex-direction: column; gap: 2px; }
+.log-row { display: flex; gap: 12px; padding: 12px 4px; border-bottom: 1px solid var(--line); align-items: flex-start; }
+.log-row:last-child { border-bottom: none; }
+.log-icon { flex: none; width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; background: var(--brand-soft); color: var(--brand-ink); }
+.log-body { font-size: 14px; line-height: 1.45; }

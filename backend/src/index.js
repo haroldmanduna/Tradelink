@@ -5,6 +5,7 @@ const express = require('express');
 const cors = require('cors');
 
 const migrate = require('./migrate');
+const seedAdmin = require('./seedAdmin');
 const { pool } = require('./db');
 const { CATEGORIES } = require('./constants');
 const { router: authRouter } = require('./routes/auth');
@@ -13,6 +14,7 @@ const { router: offersRouter } = require('./routes/offers');
 const { router: ratingsRouter } = require('./routes/ratings');
 const { router: miscRouter } = require('./routes/misc');
 const { router: walletRouter } = require('./routes/wallet');
+const { router: adminRouter } = require('./routes/admin');
 const { apiLimiter, authLimiter, writeLimiter } = require('./ratelimit');
 
 const app = express();
@@ -36,6 +38,7 @@ app.use('/api', offersRouter);   // /api/jobs/:id/offers, /api/offers/:id/accept
 app.use('/api', ratingsRouter);  // /api/jobs/:id/rating
 app.use('/api', miscRouter);     // /api/profile, /api/stats, /api/support
 app.use('/api', walletRouter);   // /api/wallet, /api/wallet/topup, /api/paynow/result
+app.use('/api/admin', adminRouter);   // admin console: overview, users, jobs, reviews, complaints, actions
 
 // --- Serve frontend build in production (single-service deploy) ---
 const distDir = path.join(__dirname, '..', '..', 'frontend', 'dist');
@@ -62,6 +65,7 @@ async function start() {
   try {
     if (process.env.SKIP_MIGRATE !== '1') {
       await migrate();
+      await seedAdmin();
     }
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`TradeLink API listening on 0.0.0.0:${PORT}`);

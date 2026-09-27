@@ -1,12 +1,12 @@
 const express = require('express');
 const { pool, query } = require('../db');
-const { requireAuth, requireRole } = require('../auth');
+const { requireAuth, requireRole, notSuspended } = require('../auth');
 
 const router = express.Router();
 
 // POST /api/jobs/:id/offers  (tradesperson) — send an offer or accept the budget.
 // If price is omitted, it defaults to the job budget (i.e. "accept budget").
-router.post('/jobs/:id/offers', requireAuth, requireRole('tradesperson'), async (req, res, next) => {
+router.post('/jobs/:id/offers', requireAuth, notSuspended, requireRole('tradesperson'), async (req, res, next) => {
   const client = await pool.connect();
   try {
     const jobId = parseInt(req.params.id, 10);
@@ -86,7 +86,7 @@ router.post('/jobs/:id/offers', requireAuth, requireRole('tradesperson'), async 
 
 // POST /api/offers/:id/accept  (customer) — accept an offer.
 // Job -> matched, chosen offer -> accepted, other offers -> rejected.
-router.post('/offers/:id/accept', requireAuth, requireRole('customer'), async (req, res, next) => {
+router.post('/offers/:id/accept', requireAuth, notSuspended, requireRole('customer'), async (req, res, next) => {
   const client = await pool.connect();
   try {
     const offerId = parseInt(req.params.id, 10);

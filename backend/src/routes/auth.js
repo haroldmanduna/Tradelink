@@ -10,6 +10,7 @@ const router = express.Router();
 async function loadFullUser(userId) {
   const { rows } = await query(
     `SELECT u.id, u.role, u.name, u.email, u.phone, u.location, u.created_at,
+            u.is_superadmin, u.suspended,
             p.category, p.skills, p.bio, p.rating, p.rating_count, p.jobs_done, p.verified
        FROM users u
        LEFT JOIN tradesperson_profiles p ON p.user_id = u.id
@@ -26,6 +27,8 @@ async function loadFullUser(userId) {
     phone: r.phone,
     location: r.location,
     created_at: r.created_at,
+    is_superadmin: r.is_superadmin || false,
+    suspended: r.suspended || false,
   };
   if (r.role === 'tradesperson') {
     user.profile = {
@@ -128,6 +131,10 @@ router.post('/login', async (req, res, next) => {
     const ok = await bcrypt.compare(password, found.password_hash);
     if (!ok) return res.status(401).json({ error: 'Invalid credentials.' });
 
+    if (found.suspended) {
+      return res.status(403).json({ error: 'Your account has been suspended. Please contact support.' });
+    }
+
     const user = await loadFullUser(found.id);
     const token = signToken(user);
     return res.json({ token, user });
@@ -141,6 +148,10 @@ router.get('/me', requireAuth, async (req, res, next) => {
   try {
     const user = await loadFullUser(req.user.id);
     if (!user) return res.status(404).json({ error: 'User not found.' });
+    // Suspended users are signed out on their next app load.
+    if (user.suspended) {
+      return res.status(403).json({ error: 'Your account has been suspended. Please contact support.' });
+    }
     return res.json({ user });
   } catch (err) {
     return next(err);

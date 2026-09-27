@@ -236,6 +236,13 @@ export function Icon({ name, size = 18, className, style, ...rest }) {
     wallet: <><rect x="3" y="6" width="18" height="13" rx="2" {...S} /><path d="M3 10h18M16 14h2" {...S} /></>,
     coins: <><ellipse cx="9" cy="7" rx="6" ry="3" {...S} /><path d="M3 7v5c0 1.7 2.7 3 6 3s6-1.3 6-3V7" {...S} /><path d="M9 15v2c0 1.7 2.7 3 6 3s6-1.3 6-3v-5c0-1.3-1.6-2.4-4-2.8" {...S} /></>,
     verified: <><path d="m12 3 2.2 1.6 2.7-.2 1 2.5 2.4 1.2-.6 2.6 1.1 2.5-1.9 2 .2 2.7-2.7.5-1.5 2.3-2.5-1-2.5 1-1.5-2.3-2.7-.5.2-2.7-1.9-2 1.1-2.5-.6-2.6 2.4-1.2 1-2.5 2.7.2L12 3Z" {...S} /><path d="m9 12 2 2 4-4" {...S} /></>,
+    users: <><circle cx="9" cy="8" r="3.2" {...S} /><path d="M3.5 20a5.5 5.5 0 0 1 11 0M16 5.2a3.2 3.2 0 0 1 0 6M17.5 20a5.5 5.5 0 0 0-3-4.9" {...S} /></>,
+    ban: <><circle cx="12" cy="12" r="9" {...S} /><path d="m5.6 5.6 12.8 12.8" {...S} /></>,
+    flag: <path d="M5 21V4h11l-1.5 4L16 12H5" {...S} />,
+    chart: <><path d="M4 4v16h16" {...S} /><path d="M8 15l3-4 3 2 4-6" {...S} /></>,
+    grid: <><rect x="3" y="3" width="7" height="7" rx="1.4" {...S} /><rect x="14" y="3" width="7" height="7" rx="1.4" {...S} /><rect x="3" y="14" width="7" height="7" rx="1.4" {...S} /><rect x="14" y="14" width="7" height="7" rx="1.4" {...S} /></>,
+    trash: <path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13M10 11v6M14 11v6" {...S} />,
+    key: <><circle cx="8" cy="15" r="4" {...S} /><path d="m11 12 9-9M17 3l3 3M15 5l2 2" {...S} /></>,
   }[name];
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" className={className} style={style} aria-hidden="true" {...rest}>

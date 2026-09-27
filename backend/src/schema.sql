@@ -130,3 +130,32 @@ CREATE TABLE IF NOT EXISTS support_messages (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Admin & moderation ---------------------------------------------------------
+-- Allow an 'admin' role alongside customers and tradespeople. The original
+-- inline CHECK is dropped and recreated so this is safe on existing databases.
+ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check;
+ALTER TABLE users ADD CONSTRAINT users_role_check
+  CHECK (role IN ('customer', 'tradesperson', 'admin'));
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_superadmin    BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS suspended        BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS suspended_at     TIMESTAMPTZ;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS suspended_reason TEXT;
+
+-- Only ONE superadmin can ever exist, and it can never be deleted while flagged.
+CREATE UNIQUE INDEX IF NOT EXISTS uniq_superadmin ON users (is_superadmin) WHERE is_superadmin;
+
+-- Immutable audit trail of every privileged action.
+CREATE TABLE IF NOT EXISTS admin_actions (
+  id          SERIAL PRIMARY KEY,
+  admin_id    INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  admin_name  TEXT,
+  action      TEXT NOT NULL,            -- 'suspend' | 'unsuspend' | 'grant_admin' | 'revoke_admin' | 'support_status'
+  target_type TEXT,                     -- 'user' | 'support'
+  target_id   INTEGER,
+  target_name TEXT,
+  detail      TEXT,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_admin_actions_time ON admin_actions(created_at DESC);
+

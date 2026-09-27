@@ -1,6 +1,6 @@
 const express = require('express');
 const { pool, query } = require('../db');
-const { requireAuth, requireRole } = require('../auth');
+const { requireAuth, requireRole, notSuspended } = require('../auth');
 const { CATEGORIES, JOB_TRANSITIONS } = require('../constants');
 
 const router = express.Router();
@@ -28,7 +28,7 @@ function shapeJob(r) {
 }
 
 // POST /api/jobs  (customer) — post a job
-router.post('/', requireAuth, requireRole('customer'), async (req, res, next) => {
+router.post('/', requireAuth, notSuspended, requireRole('customer'), async (req, res, next) => {
   try {
     let { category, custom_category, description, location, budget } = req.body || {};
     description = (description || '').trim();

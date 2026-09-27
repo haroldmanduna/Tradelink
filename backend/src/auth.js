@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { query } = require('./db');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'tradelink-dev-secret-change-me';
 const TOKEN_TTL = '30d';
@@ -36,4 +37,52 @@ function requireRole(role) {
   };
 }
 
-module.exports = { signToken, requireAuth, requireRole, JWT_SECRET };
+// Middleware: block requests from suspended accounts. Checks the DB live so a
+// suspension takes effect immediately, even on an already-issued token.
+async function notSuspended(req, res, next) {
+  try {
+    const { rows } = await query('SELECT suspended FROM users WHERE id = $1', [req.user.id]);
+    if (!rows[0]) return res.status(401).json({ error: 'Account not found.' });
+    if (rows[0].suspended) {
+      return res.status(403).json({ error: 'Your account has been suspended. Please contact support.' });
+    }
+    return next();
+  } catch (err) {
+    return next(err);
+  }
+}
+
+// Middleware: require an admin (or superadmin) account. Verified live against
+// the DB so demotions/suspensions apply immediately. Sets req.admin.
+async function requireAdmin(req, res, next) {
+  try {
+    const { rows } = await query(
+      'SELECT id, name, role, is_superadmin, suspended FROM users WHERE id = $1',
+      [req.user.id]
+    );
+    const u = rows[0];
+    if (!u || u.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access only.' });
+    }
+    if (u.suspended) {
+      return res.status(403).json({ error: 'This admin account is suspended.' });
+    }
+    req.admin = { id: u.id, name: u.name, is_superadmin: u.is_superadmin };
+    return next();
+  } catch (err) {
+    return next(err);
+  }
+}
+
+// Middleware: require THE superadmin.
+function requireSuperadmin(req, res, next) {
+  if (!req.admin || !req.admin.is_superadmin) {
+    return res.status(403).json({ error: 'Only the superadmin can do this.' });
+  }
+  return next();
+}
+
+module.exports = {
+  signToken, requireAuth, requireRole, notSuspended,
+  requireAdmin, requireSuperadmin, JWT_SECRET,
+};
