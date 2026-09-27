@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
 import { CATEGORY_LABELS } from '../api.js';
-import { Alert } from '../components.jsx';
+import { Alert, LocationSelect } from '../components.jsx';
+import { DEFAULT_LOCATION } from '../locations.js';
 import { Icon } from '../icons.jsx';
 
 export default function Auth({ mode }) {
@@ -13,7 +14,7 @@ export default function Auth({ mode }) {
 
   const [role, setRole] = useState('customer');
   const [form, setForm] = useState({
-    name: '', email: '', phone: '', password: '', location: 'Bulawayo',
+    name: '', email: '', phone: '', password: '', location: DEFAULT_LOCATION,
     category: 'electrician', skills: '', identifier: '',
   });
   const [error, setError] = useState('');
@@ -93,13 +94,7 @@ export default function Auth({ mode }) {
               </div>
               <div className="field">
                 <label>Location</label>
-                <select className="select" value={form.location} onChange={(e) => upd('location', e.target.value)}>
-                  <option>Bulawayo</option>
-                  <option>Zvishavane</option>
-                  <option>Gweru</option>
-                  <option>Masvingo</option>
-                  <option>Other</option>
-                </select>
+                <LocationSelect value={form.location} onChange={(v) => upd('location', v)} />
               </div>
               {role === 'tradesperson' && (
                 <>

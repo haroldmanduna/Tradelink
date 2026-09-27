@@ -1,5 +1,19 @@
 import React from 'react';
 import { Icon } from './icons.jsx';
+import { ZW_LOCATIONS } from './locations.js';
+
+// A single grouped select of every Zimbabwean city/town, by province.
+export function LocationSelect({ value, onChange, id, className = 'select' }) {
+  return (
+    <select id={id} className={className} value={value} onChange={(e) => onChange(e.target.value)}>
+      {ZW_LOCATIONS.map((g) => (
+        <optgroup key={g.province} label={g.province}>
+          {g.towns.map((t) => <option key={t} value={t}>{t}</option>)}
+        </optgroup>
+      ))}
+    </select>
+  );
+}
 
 export function Stars({ value = 0, count }) {
   const full = Math.round(value);

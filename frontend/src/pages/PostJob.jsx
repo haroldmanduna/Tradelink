@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api, CATEGORY_LABELS } from '../api.js';
-import { Alert } from '../components.jsx';
+import { Alert, LocationSelect } from '../components.jsx';
+import { DEFAULT_LOCATION } from '../locations.js';
 import { TradeIcon, Icon } from '../icons.jsx';
 
 export default function PostJob() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ category: 'electrician', customCategory: '', description: '', location: 'Bulawayo', budget: '' });
+  const [form, setForm] = useState({ category: 'electrician', customCategory: '', description: '', location: DEFAULT_LOCATION, budget: '' });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -72,13 +73,7 @@ export default function PostJob() {
           <div className="row">
             <div className="field">
               <label>Location</label>
-              <select className="select" value={form.location} onChange={(e) => upd('location', e.target.value)}>
-                <option>Bulawayo</option>
-                <option>Zvishavane</option>
-                <option>Gweru</option>
-                <option>Masvingo</option>
-                <option>Other</option>
-              </select>
+              <LocationSelect value={form.location} onChange={(v) => upd('location', v)} />
             </div>
             <div className="field">
               <label>Your budget (USD)</label>

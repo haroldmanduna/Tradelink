@@ -55,7 +55,7 @@ function Footer() {
       <div className="inner">
         <div>
           <Link to="/" className="brand"><Logo size={26} /> <span>Trade<span className="accent">Link</span></span></Link>
-          <p className="tag">Trusted local tradespeople for Bulawayo, Zvishavane &amp; beyond.</p>
+          <p className="tag">Trusted local tradespeople across Zimbabwe.</p>
         </div>
         <div className="cols">
           <div className="col">

@@ -25,8 +25,8 @@ export function Terms() {
   return (
     <Layout title="Terms & Conditions">
       <p>Welcome to TradeLink. These Terms &amp; Conditions ("Terms") govern your use of the TradeLink
-        platform ("Platform"), which connects customers with independent tradespeople in Bulawayo,
-        Zvishavane and surrounding areas of Zimbabwe. By creating an account or using the Platform, you agree to these Terms.</p>
+        platform ("Platform"), which connects customers with independent tradespeople across
+        Zimbabwe. By creating an account or using the Platform, you agree to these Terms.</p>
 
       <h2>1. What TradeLink is</h2>
       <p>TradeLink is a marketplace that helps customers post jobs and receive offers from tradespeople.

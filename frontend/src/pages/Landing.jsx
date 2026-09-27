@@ -9,7 +9,7 @@ export default function Landing() {
     <div className="landing">
       <section className="hero">
         <div className="hero-inner">
-          <span className="eyebrow"><span className="dot" /> Now serving Bulawayo &amp; Zvishavane</span>
+          <span className="eyebrow"><span className="dot" /> Now serving all of Zimbabwe</span>
           <h1>Trusted local <span className="accent">tradespeople</span>, on your terms.</h1>
           <p className="lead">
             Post a job, get real offers from verified electricians, plumbers, mechanics and
@@ -24,7 +24,7 @@ export default function Landing() {
             </button>
           </div>
           <div className="hero-trust">
-            <span><b>8</b> trades covered</span>
+            <span><b>28</b> trades covered</span>
             <span><b>0%</b> platform fees in v1</span>
             <span><b>Direct</b> customer contact</span>
           </div>
