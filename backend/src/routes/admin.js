@@ -74,6 +74,9 @@ router.get('/users', async (req, res, next) => {
     const { search, role, status } = req.query;
     const where = [];
     const params = [];
+    // Regular admins must NOT see admin accounts (or each other). Only the
+    // superadmin can see admins.
+    if (!req.admin.is_superadmin) where.push("u.role <> 'admin'");
     if (role && ['customer', 'tradesperson', 'admin'].includes(role)) {
       params.push(role); where.push(`u.role = $${params.length}`);
     }

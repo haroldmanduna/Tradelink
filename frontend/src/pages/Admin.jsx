@@ -158,6 +158,7 @@ function Users({ isSuper, meId }) {
   const [role, setRole] = useState('');
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(0);
+  const [pending, setPending] = useState(null);   // { user, action } for the modal
 
   const load = useCallback(() => {
     const qs = new URLSearchParams();
@@ -174,20 +175,15 @@ function Users({ isSuper, meId }) {
     const t = setTimeout(load, 300); return () => clearTimeout(t);
   }, [search]);                                           // eslint-disable-line
 
-  async function act(u, action) {
-    let body;
-    if (action === 'suspend') {
-      const reason = window.prompt(`Suspend ${u.name}? Optional reason (shown in the audit log):`, '');
-      if (reason === null) return;                        // cancelled
-      body = { reason };
-    } else {
-      const verb = { unsuspend: 'un-suspend', 'make-admin': 'make an admin', 'revoke-admin': 'remove admin from' }[action];
-      if (!window.confirm(`Are you sure you want to ${verb} ${u.name}?`)) return;
-    }
+  // Confirmed from the in-app modal (reliable everywhere, unlike window.confirm).
+  async function runAction(reason) {
+    const { user: u, action } = pending;
     setBusy(u.id); setErr(''); setMsg('');
     try {
-      await api.post(`/admin/users/${u.id}/${action}`, body);
-      setMsg(`Done: ${u.name}.`);
+      await api.post(`/admin/users/${u.id}/${action}`, action === 'suspend' ? { reason } : undefined);
+      const done = { suspend: 'suspended', unsuspend: 'un-suspended', 'make-admin': 'is now an admin', 'revoke-admin': 'is no longer an admin' }[action];
+      setMsg(`${u.name} ${done}.`);
+      setPending(null);
       load();
     } catch (e) { setErr(e.message); }
     finally { setBusy(0); }
@@ -208,7 +204,7 @@ function Users({ isSuper, meId }) {
         <div className="chips-row">
           {chip('customer', role, setRole, 'Customers')}
           {chip('tradesperson', role, setRole, 'Tradespeople')}
-          {chip('admin', role, setRole, 'Admins')}
+          {isSuper && chip('admin', role, setRole, 'Admins')}
           <span className="chips-sep" />
           {chip('active', status, setStatus, 'Active')}
           {chip('suspended', status, setStatus, 'Suspended')}
@@ -265,12 +261,12 @@ function Users({ isSuper, meId }) {
                       ) : (
                         <>
                           {u.suspended
-                            ? <button className="btn secondary sm" disabled={busy === u.id} onClick={() => act(u, 'unsuspend')}>Unsuspend</button>
-                            : <button className="btn danger sm" disabled={busy === u.id} onClick={() => act(u, 'suspend')}><Icon name="ban" size={14} /> Suspend</button>}
+                            ? <button className="btn secondary sm" disabled={busy === u.id} onClick={() => setPending({ user: u, action: 'unsuspend' })}>Unsuspend</button>
+                            : <button className="btn danger sm" disabled={busy === u.id} onClick={() => setPending({ user: u, action: 'suspend' })}><Icon name="ban" size={14} /> Suspend</button>}
                           {isSuper && u.role !== 'admin' && u.id !== meId &&
-                            <button className="btn ghost sm" disabled={busy === u.id} onClick={() => act(u, 'make-admin')}>Make admin</button>}
+                            <button className="btn ghost sm" disabled={busy === u.id} onClick={() => setPending({ user: u, action: 'make-admin' })}>Make admin</button>}
                           {isSuper && u.role === 'admin' &&
-                            <button className="btn ghost sm" disabled={busy === u.id} onClick={() => act(u, 'revoke-admin')}>Remove admin</button>}
+                            <button className="btn ghost sm" disabled={busy === u.id} onClick={() => setPending({ user: u, action: 'revoke-admin' })}>Remove admin</button>}
                         </>
                       )}
                     </div>
@@ -281,6 +277,41 @@ function Users({ isSuper, meId }) {
           </table>
         </div>
       )}
+
+      <ConfirmModal pending={pending} busy={!!busy}
+        onCancel={() => setPending(null)} onConfirm={runAction} />
+    </div>
+  );
+}
+
+/* ------------------------------------------------------- Confirmation modal */
+function ConfirmModal({ pending, busy, onCancel, onConfirm }) {
+  const [reason, setReason] = useState('');
+  useEffect(() => { setReason(''); }, [pending]);
+  if (!pending) return null;
+  const { user: u, action } = pending;
+  const meta = {
+    suspend:        { title: `Suspend ${u.name}?`,          body: 'They will be signed out and blocked from using TradeLink until you un-suspend them.', cta: 'Suspend',      danger: true, reason: true },
+    unsuspend:      { title: `Un-suspend ${u.name}?`,       body: 'They will be able to log in and use TradeLink again.',                                cta: 'Un-suspend' },
+    'make-admin':   { title: `Make ${u.name} an admin?`,    body: 'They will get access to the admin console and can manage users and complaints.',       cta: 'Make admin' },
+    'revoke-admin': { title: `Remove admin from ${u.name}?`,body: 'They will lose admin access and return to a normal account.',                          cta: 'Remove admin', danger: true },
+  }[action];
+  return (
+    <div className="modal-overlay" onClick={onCancel}>
+      <div className="modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+        <h3 className="modal-title">{meta.title}</h3>
+        <p className="muted modal-body">{meta.body}</p>
+        {meta.reason && (
+          <textarea className="textarea" rows={3} value={reason} autoFocus
+            placeholder="Reason (optional — saved to the audit log)"
+            onChange={(e) => setReason(e.target.value)} />
+        )}
+        <div className="modal-actions">
+          <button className="btn secondary" onClick={onCancel} disabled={busy}>Cancel</button>
+          <button className={`btn ${meta.danger ? 'danger' : ''}`} disabled={busy}
+            onClick={() => onConfirm(reason)}>{busy ? 'Working…' : meta.cta}</button>
+        </div>
+      </div>
     </div>
   );
 }

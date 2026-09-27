@@ -466,3 +466,12 @@ svg { display: block; }
 .log-row:last-child { border-bottom: none; }
 .log-icon { flex: none; width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; background: var(--brand-soft); color: var(--brand-ink); }
 .log-body { font-size: 14px; line-height: 1.45; }
+
+/* ---------------------------------------------------------- Admin modal --- */
+.modal-overlay { position: fixed; inset: 0; background: rgba(14,17,22,.5); backdrop-filter: blur(2px); display: grid; place-items: center; padding: 20px; z-index: 100; }
+.modal { background: var(--card); border-radius: var(--r); box-shadow: var(--shadow-lg); width: 100%; max-width: 420px; padding: 22px 22px 18px; animation: modal-in .14s ease-out; }
+@keyframes modal-in { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+.modal-title { font-family: var(--display); font-size: 19px; margin: 0 0 6px; color: var(--ink-900); }
+.modal-body { margin: 0 0 14px; line-height: 1.5; }
+.modal .textarea { width: 100%; margin-bottom: 14px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
