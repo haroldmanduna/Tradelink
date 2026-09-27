@@ -1,10 +1,7 @@
-# Render Blueprint for TradeLink (single web service + managed Postgres).
-# Deploy: push to GitHub, then in Render "New +" -> "Blueprint" and pick this repo.
-databases:
-  - name: tradelink-db
-    plan: free
-    databaseName: tradelink
-    user: tradelink
+# Render Blueprint for TradeLink (single web service).
+# Database is hosted on Supabase (Postgres) — DATABASE_URL is set in the Render
+# dashboard/API and is intentionally NOT managed by this blueprint (sync: false),
+# so a blueprint re-sync can never overwrite the Supabase connection string.
 
 services:
   - type: web
@@ -18,10 +15,9 @@ services:
     autoDeploy: true
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: tradelink-db
-          property: connectionString
+        sync: false
       - key: JWT_SECRET
         generateValue: true
       - key: NODE_VERSION
         value: "20.11.1"
+
