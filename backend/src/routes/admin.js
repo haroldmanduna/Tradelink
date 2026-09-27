@@ -180,6 +180,43 @@ router.patch('/complaints/:id', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// POST /api/admin/admins — CREATE a brand-new admin account (superadmin only).
+// The new admin logs in with the email/phone + password set here.
+router.post('/admins', requireSuperadmin, async (req, res, next) => {
+  try {
+    let { name, email, phone, password } = req.body || {};
+    name = (name || '').trim();
+    email = email ? String(email).trim().toLowerCase() : null;
+    phone = phone ? String(phone).trim() : null;
+    if (!name) return res.status(400).json({ error: 'Name is required.' });
+    if (!email && !phone) return res.status(400).json({ error: 'An email or phone is required (it is their login).' });
+    if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      return res.status(400).json({ error: 'Enter a valid email address.' });
+    }
+    if (phone && phone.replace(/\D/g, '').length < 9) {
+      return res.status(400).json({ error: 'Enter a valid phone number.' });
+    }
+    if (!password || String(password).length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters.' });
+    }
+    const dup = await query(
+      'SELECT 1 FROM users WHERE (email IS NOT NULL AND email = $1) OR (phone IS NOT NULL AND phone = $2)',
+      [email, phone]
+    );
+    if (dup.rowCount > 0) return res.status(409).json({ error: 'An account with that email or phone already exists.' });
+
+    const hash = await bcrypt.hash(String(password), 10);
+    const ins = await query(
+      `INSERT INTO users (role, name, email, phone, password_hash, location, is_superadmin)
+       VALUES ('admin', $1, $2, $3, $4, $5, false)
+       RETURNING id, name, email, phone`,
+      [name, email, phone, hash, 'Bulawayo']
+    );
+    await logAction(req.admin, 'grant_admin', 'user', ins.rows[0].id, name, 'created new admin account');
+    return res.status(201).json({ admin: ins.rows[0] });
+  } catch (err) { next(err); }
+});
+
 // GET /api/admin/actions — the audit log.
 router.get('/actions', async (req, res, next) => {
   try {

@@ -19,6 +19,7 @@ export default function Admin() {
   const { user } = useAuth();
   const [tab, setTab] = useState('overview');
   const [showPw, setShowPw] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
   const isSuper = !!(user && user.is_superadmin);
 
   return (
@@ -34,12 +35,20 @@ export default function Admin() {
               : <span className="badge open" style={{ marginLeft: 8 }}>Admin</span>}
           </p>
         </div>
-        <button className="btn ghost sm" onClick={() => setShowPw((s) => !s)}>
-          <Icon name="key" size={15} /> Change password
-        </button>
+        <div className="admin-head-actions">
+          {isSuper && (
+            <button className="btn" onClick={() => setShowAdd(true)}>
+              <Icon name="plus" size={16} /> Add admin
+            </button>
+          )}
+          <button className="btn ghost sm" onClick={() => setShowPw((s) => !s)}>
+            <Icon name="key" size={15} /> Change password
+          </button>
+        </div>
       </div>
 
       {showPw && <ChangePassword onDone={() => setShowPw(false)} />}
+      {showAdd && <AddAdmin onClose={() => setShowAdd(false)} />}
 
       <div className="tabs">
         {TABS.map((t) => (
@@ -55,6 +64,59 @@ export default function Admin() {
       {tab === 'reviews'    && <Reviews />}
       {tab === 'complaints' && <Complaints />}
       {tab === 'activity'   && <Activity />}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------- Add admin -- */
+function AddAdmin({ onClose }) {
+  const [f, setF] = useState({ name: '', email: '', phone: '', password: '' });
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [created, setCreated] = useState(null);
+  const up = (k, v) => setF((s) => ({ ...s, [k]: v }));
+
+  async function submit(e) {
+    e.preventDefault();
+    setErr(''); setBusy(true);
+    try {
+      const { admin } = await api.post('/admin/admins', f);
+      setCreated({ login: admin.email || admin.phone, password: f.password, name: admin.name });
+    } catch (e2) { setErr(e2.message); }
+    finally { setBusy(false); }
+  }
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+        {created ? (
+          <>
+            <h3 className="modal-title">Admin created ✓</h3>
+            <p className="muted modal-body">Give <strong>{created.name}</strong> these details — they can log in right away at the same site.</p>
+            <div className="cred-box">
+              <div><span>Login</span><strong>{created.login}</strong></div>
+              <div><span>Password</span><strong>{created.password}</strong></div>
+            </div>
+            <div className="modal-actions">
+              <button className="btn" onClick={onClose}>Done</button>
+            </div>
+          </>
+        ) : (
+          <form onSubmit={submit}>
+            <h3 className="modal-title">Add a new admin</h3>
+            <p className="muted modal-body">Set their login and password here. They sign in at the normal login page and land straight on the admin console.</p>
+            {err && <Alert kind="error">{err}</Alert>}
+            <input className="input" placeholder="Full name" value={f.name} onChange={(e) => up('name', e.target.value)} autoFocus />
+            <input className="input" type="email" placeholder="Email (used to log in)" value={f.email} onChange={(e) => up('email', e.target.value)} />
+            <input className="input" placeholder="Phone (optional)" value={f.phone} onChange={(e) => up('phone', e.target.value)} />
+            <input className="input" placeholder="Password (min 8 characters)" value={f.password} onChange={(e) => up('password', e.target.value)} />
+            <div className="modal-actions">
+              <button type="button" className="btn secondary" onClick={onClose} disabled={busy}>Cancel</button>
+              <button className="btn" disabled={busy}>{busy ? 'Creating…' : 'Create admin'}</button>
+            </div>
+          </form>
+        )}
+      </div>
     </div>
   );
 }
