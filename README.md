@@ -62,17 +62,40 @@ For a production-style single server: build the frontend (`cd frontend && npm ru
 
 This repo includes `render.yaml`. In the Render dashboard: **New + → Blueprint → pick this repo**. It provisions a free Postgres database and a web service; `DATABASE_URL` and `JWT_SECRET` are wired automatically. The build runs `npm run build` (installs both apps + builds the frontend) and start runs `npm start`. Migrations run automatically on boot.
 
+## Features
+
+- **inDrive-style bidding** — customers post jobs; matching tradespeople accept the budget or counter-offer.
+- **Two-sided completion** — the assigned tradesperson can **mark the job done + leave a completion note**; the customer then confirms completion and rates.
+- **Withdraw offer** — tradespeople can retract a pending offer.
+- **Editable pro profile** — skills + bio shown next to offers.
+- **Dashboard stats** — live counters for both roles.
+- **Support inbox** — contact form stored in `support_messages`.
+- **Legal** — Terms, Privacy Policy, Cookie Policy pages + a cookie-consent banner.
+- **Security** — bcrypt passwords, JWT auth, and **rate limiting** (general API, strict auth, write endpoints).
+
 ## API overview
 
 ```
-POST /api/auth/register        POST /api/auth/login        GET /api/auth/me
-POST /api/jobs                 GET  /api/jobs?status=&category=
-GET  /api/jobs/mine            GET  /api/jobs/assigned      GET /api/jobs/:id
-PATCH /api/jobs/:id/status
-POST /api/jobs/:id/offers      POST /api/offers/:id/accept  GET /api/offers/mine
-POST /api/jobs/:id/rating
-GET  /api/meta/categories      GET  /api/health
+POST  /api/auth/register       POST /api/auth/login        GET  /api/auth/me
+POST  /api/jobs                GET  /api/jobs?status=&category=
+GET   /api/jobs/mine           GET  /api/jobs/assigned      GET  /api/jobs/:id
+PATCH /api/jobs/:id/status     POST /api/jobs/:id/mark-done
+POST  /api/jobs/:id/offers     POST /api/offers/:id/accept  POST /api/offers/:id/withdraw
+GET   /api/offers/mine         POST /api/jobs/:id/rating
+PATCH /api/profile             GET  /api/stats              POST /api/support
+GET   /api/meta/categories     GET  /api/health
 ```
+
+## Deploy note
+
+The Render web service was created from a **public Git URL**, so GitHub push webhooks are not installed and auto-deploy will not fire on `git push`. Trigger a deploy of the latest commit with:
+
+```bash
+curl -X POST https://api.render.com/v1/services/<serviceId>/deploys \
+  -H "Authorization: Bearer <RENDER_API_KEY>" -H "Content-Type: application/json" -d '{}'
+```
+
+To get true auto-deploy, connect the GitHub repo to Render via the dashboard (Settings → Build & Deploy → connect repository).
 
 ## Tests
 
