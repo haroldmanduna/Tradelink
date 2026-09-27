@@ -162,6 +162,7 @@ router.get('/:id', requireAuth, async (req, res, next) => {
 
     const offersRes = await query(
       `SELECT o.*, u.name AS tradesperson_name, u.location AS tradesperson_location,
+              u.phone AS tradesperson_phone,
               p.category, p.rating, p.rating_count, p.jobs_done, p.verified
          FROM offers o
          JOIN users u ON u.id = o.tradesperson_id
@@ -177,6 +178,7 @@ router.get('/:id', requireAuth, async (req, res, next) => {
       tradesperson_id: o.tradesperson_id,
       tradesperson_name: o.tradesperson_name,
       tradesperson_location: o.tradesperson_location,
+      // Phone revealed only on the ACCEPTED offer (added below for the owner).
       category: o.category,
       rating: o.rating != null ? Number(o.rating) : 0,
       rating_count: o.rating_count || 0,
@@ -186,6 +188,7 @@ router.get('/:id', requireAuth, async (req, res, next) => {
       message: o.message,
       status: o.status,
       created_at: o.created_at,
+      _phone: o.tradesperson_phone, // internal, stripped before send unless accepted+owner
     }));
 
     const result = {
@@ -196,14 +199,20 @@ router.get('/:id', requireAuth, async (req, res, next) => {
     // Only the job owner can see the customer phone + full offer list detail.
     const isOwner = req.user.id === job.customer_id;
     if (isOwner) {
-      result.offers = offers;
+      // Owner: hide their own phone (not useful to them). Reveal the ACCEPTED
+      // tradesperson's phone so they can make contact.
+      delete result.customer_phone;
+      result.offers = offers.map((o) => {
+        const { _phone, ...rest } = o;
+        return o.status === 'accepted' ? { ...rest, tradesperson_phone: _phone } : rest;
+      });
     } else {
       // A tradesperson only sees their own offer on this job.
-      result.offers = offers.filter((o) => o.tradesperson_id === req.user.id);
-      delete result.customer_phone; // hide until matched
       const mine = offers.find((o) => o.tradesperson_id === req.user.id);
+      result.offers = mine ? [(() => { const { _phone, ...rest } = mine; return rest; })()] : [];
+      delete result.customer_phone; // hide until matched
       if (mine && mine.status === 'accepted') {
-        result.customer_phone = job.customer_phone;
+        result.customer_phone = job.customer_phone; // reveal customer's phone to matched pro
       }
     }
     return res.json({ job: result });

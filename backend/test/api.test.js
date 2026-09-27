@@ -55,6 +55,7 @@ async function run() {
   // Register electrician
   r = await api('POST', '/api/auth/register', { body: {
     role: 'tradesperson', name: 'Sipho Ncube', email: `sipho${uniq}@mail.com`,
+    phone: `071${uniq}`.slice(0, 12),
     password: 'secret123', location: 'Bulawayo', category: 'electrician', skills: 'Wiring, solar',
   }});
   assert(r.status === 201 && r.data.user.profile.category === 'electrician', 'register electrician w/ profile');
@@ -63,6 +64,7 @@ async function run() {
   // Register a 2nd electrician
   r = await api('POST', '/api/auth/register', { body: {
     role: 'tradesperson', name: 'Rudo Dube', email: `rudo${uniq}@mail.com`,
+    phone: `072${uniq}`.slice(0, 12),
     password: 'secret123', location: 'Zvishavane', category: 'electrician',
   }});
   const elec2 = r.data;
@@ -71,6 +73,7 @@ async function run() {
   // Register a plumber (should NOT see electrician jobs / cannot bid)
   r = await api('POST', '/api/auth/register', { body: {
     role: 'tradesperson', name: 'Farai Sibanda', email: `farai${uniq}@mail.com`,
+    phone: `073${uniq}`.slice(0, 12),
     password: 'secret123', location: 'Bulawayo', category: 'plumber',
   }});
   const plumber = r.data;
@@ -78,15 +81,21 @@ async function run() {
 
   // Duplicate email rejected
   r = await api('POST', '/api/auth/register', { body: {
-    role: 'customer', name: 'Dup', email: `thandi${uniq}@mail.com`, password: 'secret123', location: 'Bulawayo',
+    role: 'customer', name: 'Dup', email: `thandi${uniq}@mail.com`, phone: `075${uniq}`.slice(0, 12), password: 'secret123', location: 'Bulawayo',
   }});
   assert(r.status === 409, 'duplicate email rejected (409)');
 
   // Bad password rejected
   r = await api('POST', '/api/auth/register', { body: {
-    role: 'customer', name: 'Short', email: `x${uniq}@mail.com`, password: '123', location: 'Bulawayo',
+    role: 'customer', name: 'Short', email: `x${uniq}@mail.com`, phone: `076${uniq}`.slice(0, 12), password: '123', location: 'Bulawayo',
   }});
   assert(r.status === 400, 'short password rejected (400)');
+
+  // Phone is now required (it's how matched parties reach each other).
+  r = await api('POST', '/api/auth/register', { body: {
+    role: 'customer', name: 'NoPhone', email: `np${uniq}@mail.com`, password: 'secret123', location: 'Harare',
+  }});
+  assert(r.status === 400, 'registration without a phone number rejected (400)');
 
   // Login
   r = await api('POST', '/api/auth/login', { body: { identifier: `sipho${uniq}@mail.com`, password: 'secret123' }});
@@ -189,6 +198,14 @@ async function run() {
   r = await api('GET', `/api/jobs/${job.id}`, { token: elec2.token });
   assert(r.data.job.customer_phone, 'winning tradesperson can see customer phone after match');
 
+  // Customer (owner) sees the accepted tradesperson's phone — contact is mutual.
+  r = await api('GET', `/api/jobs/${job.id}`, { token: customer.token });
+  const accOffer = r.data.job.offers.find((o) => o.status === 'accepted');
+  assert(accOffer && accOffer.tradesperson_phone, 'customer can see accepted tradesperson phone after match');
+  assert(r.data.job.customer_phone === undefined, 'owner does not see their own phone in the contact box');
+  const lostOffer = r.data.job.offers.find((o) => o.status === 'rejected');
+  assert(!lostOffer || lostOffer.tradesperson_phone === undefined, 'non-accepted offers never leak a phone number');
+
   // Status: matched -> in_progress -> completed
   r = await api('PATCH', `/api/jobs/${job.id}/status`, { token: customer.token, body: { status: 'in_progress' }});
   assert(r.status === 200 && r.data.job.status === 'in_progress', 'customer marks in_progress');
@@ -282,6 +299,7 @@ async function run() {
   console.log('\n-- Expanded categories + Other --');
   r = await api('POST', '/api/auth/register', { body: {
     role: 'tradesperson', name: 'Tiler Tom', email: `tiler${uniq}@mail.com`,
+    phone: `074${uniq}`.slice(0, 12),
     password: 'secret123', location: 'Bulawayo', category: 'tiler' }});
   assert(r.status === 201 && r.data.user.profile.category === 'tiler', 'register tradesperson with new category (tiler)');
   r = await api('POST', '/api/jobs', { token: customer.token, body: {

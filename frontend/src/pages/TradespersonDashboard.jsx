@@ -234,8 +234,13 @@ function AssignedJobs() {
             <strong>{tradeLabel(j.category, j.custom_category)} · {j.location}</strong>
             <StatusBadge status={j.status} />
           </div>
-          <div className="muted small" style={{ margin: '4px 0 8px' }}>
-            Customer: {j.customer_name}{j.customer_phone ? ` · 📞 ${j.customer_phone}` : ''}
+          <div className="muted small flex" style={{ margin: '4px 0 8px', gap: 6, alignItems: 'center' }}>
+            Customer: {j.customer_name}
+            {j.customer_phone && (
+              <span className="flex" style={{ gap: 4, alignItems: 'center' }}>
+                · <Icon name="phone" size={13} /> <a href={`tel:${j.customer_phone}`}>{j.customer_phone}</a>
+              </span>
+            )}
           </div>
           <div>{j.description}</div>
           <div className="flex between wrap" style={{ marginTop: 10 }}>

@@ -409,3 +409,6 @@ svg { display: block; }
 .lr-delta.neg { color: var(--danger); }
 .lr-bal { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
 .lr-time { color: var(--muted); font-size: 12.5px; white-space: nowrap; }
+
+.opt { font-weight: 400; color: var(--muted); font-size: 12px; }
+.contact-box a { color: inherit; text-decoration: underline; }

@@ -57,7 +57,11 @@ router.post('/register', async (req, res, next) => {
 
     if (!name) return res.status(400).json({ error: 'Name is required.' });
     if (!location) return res.status(400).json({ error: 'Location is required.' });
-    if (!email && !phone) return res.status(400).json({ error: 'Provide an email or phone number.' });
+    // Phone is REQUIRED: it's how the two parties contact each other once matched.
+    if (!phone) return res.status(400).json({ error: 'A phone number is required so you can be contacted once matched.' });
+    if (phone.replace(/\D/g, '').length < 9) {
+      return res.status(400).json({ error: 'Enter a valid phone number, e.g. 0771234567.' });
+    }
     if (!password || password.length < 6) {
       return res.status(400).json({ error: 'Password must be at least 6 characters.' });
     }

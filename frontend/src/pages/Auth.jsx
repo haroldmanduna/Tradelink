@@ -84,12 +84,13 @@ export default function Auth({ mode }) {
               </div>
               <div className="row">
                 <div className="field">
-                  <label>Email</label>
+                  <label>Email <span className="opt">(optional)</span></label>
                   <input className="input" type="email" value={form.email} onChange={(e) => upd('email', e.target.value)} placeholder="you@mail.com" />
                 </div>
                 <div className="field">
                   <label>Phone</label>
-                  <input className="input" value={form.phone} onChange={(e) => upd('phone', e.target.value)} placeholder="0772 000 000" />
+                  <input className="input" type="tel" value={form.phone} onChange={(e) => upd('phone', e.target.value)} placeholder="0772 000 000" required />
+                  <p className="hint">Shared with the other party once a job is matched, so you can be reached.</p>
                 </div>
               </div>
               <div className="field">

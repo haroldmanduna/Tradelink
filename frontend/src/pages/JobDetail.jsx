@@ -31,6 +31,16 @@ export default function JobDetail() {
   const isCustomer = user.role === 'customer';
   const isOwner = isCustomer && job.customer_id === user.id;
 
+  // Once matched, reveal the OTHER party's contact (mutual).
+  const acceptedOffer = (job.offers || []).find((o) => o.status === 'accepted');
+  const contact = isOwner
+    ? (acceptedOffer && acceptedOffer.tradesperson_phone
+        ? { name: acceptedOffer.tradesperson_name, phone: acceptedOffer.tradesperson_phone, label: 'your tradesperson' }
+        : null)
+    : (job.customer_phone
+        ? { name: job.customer_name, phone: job.customer_phone, label: 'the customer' }
+        : null);
+
   async function act(fn, successMsg) {
     setBusy(true); setError(''); setNotice('');
     try {
@@ -65,11 +75,15 @@ export default function JobDetail() {
           </div>
         </div>
 
-        {job.customer_phone && (
+        {contact && (
           <div className="alert ok" style={{ marginTop: 14, marginBottom: 0 }}>
             <div className="contact-box">
               <span className="ic"><Icon name="phone" size={18} /></span>
-              <span>Contact: <strong>{job.customer_phone}</strong> — arrange the work &amp; payment directly.</span>
+              <span>
+                Contact {contact.name} ({contact.label}):{' '}
+                <a href={`tel:${contact.phone}`}><strong>{contact.phone}</strong></a>
+                {' '}— arrange the work &amp; payment directly.
+              </span>
             </div>
           </div>
         )}
