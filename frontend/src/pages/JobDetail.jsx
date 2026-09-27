@@ -115,6 +115,18 @@ function CustomerView({ job, act, busy }) {
             <OfferCard key={o.id} o={o} accepted />
           ))}
 
+          {job.worker_marked_done && job.status !== 'completed' && job.status !== 'cancelled' && (
+            <div className="alert ok" style={{ marginTop: 14 }}>
+              <Icon name="check" size={17} />
+              <div>
+                <strong>The tradesperson marked this job as done.</strong> Please confirm it's complete, then leave a rating.
+                {job.completion_note && (
+                  <div className="note-box"><div className="lbl">Their note</div><p>“{job.completion_note}”</p></div>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="divider" />
 
           {job.status === 'matched' && (
@@ -174,6 +186,7 @@ function RatingSection({ job, act, busy }) {
 function TradespersonView({ job, user, act, busy }) {
   const mine = (job.offers || []).find((o) => o.tradesperson_id === user.id);
   const canBid = job.status === 'open' && user.profile && user.profile.category === job.category;
+  const isAssigned = mine && mine.status === 'accepted';
   const [price, setPrice] = useState('');
   const [message, setMessage] = useState('');
 
@@ -181,12 +194,34 @@ function TradespersonView({ job, user, act, busy }) {
     return <div className="card"><p className="muted">This is a {CATEGORY_LABELS[job.category]} job — outside your trade ({CATEGORY_LABELS[user.profile.category]}).</p></div>;
   }
 
+  const statusMsg = mine
+    ? (mine.status === 'accepted' ? 'Accepted — this job is yours!'
+      : mine.status === 'rejected' ? 'Not selected'
+      : mine.status === 'withdrawn' ? 'You withdrew this offer'
+      : 'Pending customer review')
+    : '';
+
   return (
     <div className="card">
-      {mine && (
+      {mine && mine.status !== 'withdrawn' && (
         <div className={`alert ${mine.status === 'accepted' ? 'ok' : mine.status === 'rejected' ? 'error' : 'info'}`}>
-          Your offer: <strong>{money(mine.price)}</strong> — {mine.status === 'accepted' ? '🎉 Accepted!' : mine.status === 'rejected' ? 'Not selected' : 'Pending customer review'}
+          <Icon name={mine.status === 'accepted' ? 'check' : 'chat'} size={17} />
+          <div>Your offer: <strong>{money(mine.price)}</strong> — {statusMsg}</div>
         </div>
+      )}
+
+      {mine && mine.status === 'pending' && job.status === 'open' && (
+        <button className="btn danger sm" disabled={busy} style={{ marginBottom: 14 }}
+          onClick={() => act(() => api.post(`/offers/${mine.id}/withdraw`), 'Offer withdrawn.')}>
+          <Icon name="x" size={15} /> Withdraw my offer
+        </button>
+      )}
+
+      {isAssigned && (job.status === 'matched' || job.status === 'in_progress') && (
+        <MarkDoneSection job={job} act={act} busy={busy} />
+      )}
+      {isAssigned && job.status === 'completed' && (
+        <div className="alert ok"><Icon name="check" size={17} /><div>This job is complete. Thanks for your work!</div></div>
       )}
 
       {canBid ? (
@@ -220,6 +255,40 @@ function TradespersonView({ job, user, act, busy }) {
       ) : (
         job.status !== 'open' && !mine && <p className="muted">This job is no longer open for offers.</p>
       )}
+    </div>
+  );
+}
+
+function MarkDoneSection({ job, act, busy }) {
+  const [note, setNote] = useState('');
+  if (job.worker_marked_done) {
+    return (
+      <div className="alert info">
+        <Icon name="clock" size={17} />
+        <div>
+          You marked this job as done. Waiting for the customer to confirm &amp; rate.
+          {job.completion_note && (
+            <div className="note-box"><div className="lbl">Your note</div><p>“{job.completion_note}”</p></div>
+          )}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div>
+      <h3 style={{ marginTop: 0 }}>Finished the work?</h3>
+      <p className="small muted" style={{ marginTop: 0 }}>
+        Mark the job as done and leave a note for the customer. They'll confirm completion and rate you.
+      </p>
+      <div className="field">
+        <label>Completion note <span className="muted small">(optional)</span></label>
+        <textarea className="textarea" value={note} onChange={(e) => setNote(e.target.value)}
+          placeholder="e.g. Replaced the geyser element and tested — all working. Left the old part with you." />
+      </div>
+      <button className="btn accent" disabled={busy}
+        onClick={() => act(() => api.post(`/jobs/${job.id}/mark-done`, { note }), 'Marked as done — the customer will confirm.')}>
+        <Icon name="check" size={16} /> Mark work as done
+      </button>
     </div>
   );
 }

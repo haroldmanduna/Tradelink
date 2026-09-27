@@ -65,6 +65,19 @@ export function Loading() {
   return <div className="loading"><div className="spinner" />Loading…</div>;
 }
 
+export function StatBar({ items }) {
+  return (
+    <div className="statbar">
+      {items.map((it, i) => (
+        <div className="stat" key={i}>
+          <div className="v">{it.v}</div>
+          <div className="l">{it.l}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function money(n) {
   return '$' + Number(n).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }

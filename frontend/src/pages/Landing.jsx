@@ -87,10 +87,7 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
-      <div className="foot">
-        TradeLink · Payment is arranged directly between customer and tradesperson · v1
-      </div>
+      <div style={{ height: 30 }} />
     </div>
   );
 }

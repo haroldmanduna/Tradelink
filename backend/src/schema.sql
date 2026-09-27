@@ -78,3 +78,20 @@ CREATE INDEX IF NOT EXISTS idx_jobs_customer ON jobs(customer_id);
 CREATE INDEX IF NOT EXISTS idx_offers_job ON offers(job_id);
 CREATE INDEX IF NOT EXISTS idx_offers_trade ON offers(tradesperson_id);
 CREATE INDEX IF NOT EXISTS idx_profiles_category ON tradesperson_profiles(category);
+
+-- v1.1 additions: two-sided completion + support inbox (idempotent) ---------
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS worker_marked_done BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS worker_done_at TIMESTAMPTZ;
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS completion_note TEXT;
+
+CREATE TABLE IF NOT EXISTS support_messages (
+  id         SERIAL PRIMARY KEY,
+  user_id    INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  name       TEXT NOT NULL,
+  email      TEXT NOT NULL,
+  subject    TEXT NOT NULL,
+  message    TEXT NOT NULL,
+  status     TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'open', 'resolved')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+

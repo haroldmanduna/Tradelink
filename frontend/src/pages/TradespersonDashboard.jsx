@@ -2,16 +2,21 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, CATEGORY_LABELS } from '../api.js';
 import { useAuth } from '../auth.jsx';
-import { Stars, StatusBadge, Empty, Loading, money, timeAgo } from '../components.jsx';
+import { Stars, StatusBadge, Empty, Loading, StatBar, Alert, money, timeAgo } from '../components.jsx';
 import { TradeIcon, Icon } from '../icons.jsx';
 
 export default function TradespersonDashboard() {
   const { user } = useAuth();
   const [tab, setTab] = useState('open');
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    api.get('/stats').then((d) => setStats(d.stats)).catch(() => {});
+  }, []);
 
   return (
     <div className="container">
-      <div className="flex between wrap" style={{ marginBottom: 6 }}>
+      <div className="flex between wrap" style={{ marginBottom: 16 }}>
         <div>
           <h1 className="h1 flex" style={{ gap: 10 }}>
             <span className="job-icon" style={{ width: 40, height: 40 }}><TradeIcon name={user.profile?.category} size={22} /></span>
@@ -25,15 +30,73 @@ export default function TradespersonDashboard() {
         </div>
       </div>
 
+      {stats && (
+        <StatBar items={[
+          { v: stats.available, l: 'Open jobs for you' },
+          { v: stats.pending_offers, l: 'Pending offers' },
+          { v: stats.active, l: 'Active jobs' },
+          { v: stats.completed, l: 'Completed' },
+        ]} />
+      )}
+
       <div className="tabs">
         <div className={`tab ${tab === 'open' ? 'active' : ''}`} onClick={() => setTab('open')}>Open jobs</div>
         <div className={`tab ${tab === 'offers' ? 'active' : ''}`} onClick={() => setTab('offers')}>My offers</div>
         <div className={`tab ${tab === 'assigned' ? 'active' : ''}`} onClick={() => setTab('assigned')}>Accepted jobs</div>
+        <div className={`tab ${tab === 'profile' ? 'active' : ''}`} onClick={() => setTab('profile')}>Profile</div>
       </div>
 
       {tab === 'open' && <OpenJobs myCategory={user.profile?.category} />}
       {tab === 'offers' && <MyOffers />}
       {tab === 'assigned' && <AssignedJobs />}
+      {tab === 'profile' && <ProfileTab />}
+    </div>
+  );
+}
+
+function ProfileTab() {
+  const { user, refresh } = useAuth();
+  const [skills, setSkills] = useState(user.profile?.skills || '');
+  const [bio, setBio] = useState(user.profile?.bio || '');
+  const [msg, setMsg] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  async function save(e) {
+    e.preventDefault();
+    setBusy(true); setMsg(''); setError('');
+    try {
+      await api.patch('/profile', { skills, bio });
+      await refresh();
+      setMsg('Profile updated.');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="card" style={{ maxWidth: 560 }}>
+      <h3 style={{ marginTop: 0 }}>Your public profile</h3>
+      <p className="small muted" style={{ marginTop: 0 }}>
+        This is what customers see next to your offers. Trade: <strong>{CATEGORY_LABELS[user.profile?.category]}</strong>.
+      </p>
+      {msg && <Alert kind="ok">{msg}</Alert>}
+      {error && <Alert kind="error">{error}</Alert>}
+      <form onSubmit={save}>
+        <div className="field">
+          <label>Skills</label>
+          <input className="input" value={skills} onChange={(e) => setSkills(e.target.value)}
+            placeholder="e.g. Wiring, solar installs, geysers, DB boards" maxLength={300} />
+        </div>
+        <div className="field">
+          <label>About you</label>
+          <textarea className="textarea" value={bio} onChange={(e) => setBio(e.target.value)}
+            placeholder="Tell customers about your experience, reliability and area you cover." maxLength={600} />
+        </div>
+        <button className="btn" disabled={busy} type="submit">{busy ? 'Saving…' : 'Save profile'}</button>
+      </form>
     </div>
   );
 }
@@ -68,7 +131,7 @@ function OpenJobs({ myCategory }) {
       )}
       {jobs === null && <Loading />}
       {jobs && jobs.length === 0 && (
-        <div className="card"><Empty icon="🔍" title="No open jobs here right now">Check back soon or try another category.</Empty></div>
+        <div className="card"><Empty icon="search" title="No open jobs here right now">Check back soon or try another category.</Empty></div>
       )}
 
       {jobs && jobs.map((j) => (
@@ -102,15 +165,25 @@ function OpenJobs({ myCategory }) {
 function MyOffers() {
   const [offers, setOffers] = useState(null);
   const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const load = useCallback(() => {
     api.get('/offers/mine').then((d) => setOffers(d.offers)).catch((e) => setError(e.message));
   }, []);
+  useEffect(() => { load(); }, [load]);
+
+  async function withdraw(e, id) {
+    e.stopPropagation();
+    setBusy(true);
+    try { await api.post(`/offers/${id}/withdraw`); load(); }
+    catch (err) { setError(err.message); }
+    finally { setBusy(false); }
+  }
 
   if (error) return <div className="alert error">{error}</div>;
   if (offers === null) return <Loading />;
-  if (offers.length === 0) return <div className="card"><Empty icon="💬" title="No offers yet">Browse open jobs and send your first offer.</Empty></div>;
+  if (offers.length === 0) return <div className="card"><Empty icon="chat" title="No offers yet">Browse open jobs and send your first offer.</Empty></div>;
 
   return offers.map((o) => (
     <div key={o.id} className="card tap" onClick={() => navigate(`/jobs/${o.job_id}`)}>
@@ -121,9 +194,16 @@ function MyOffers() {
         </div>
         <div style={{ textAlign: 'right' }}>
           <div className="price">{money(o.price)}</div>
-          <span className={`badge ${o.status === 'accepted' ? 'completed' : o.status === 'rejected' ? 'cancelled' : 'open'}`}>{o.status}</span>
+          <span className={`badge ${o.status === 'accepted' ? 'completed' : (o.status === 'rejected' || o.status === 'withdrawn') ? 'cancelled' : 'open'}`}>{o.status}</span>
         </div>
       </div>
+      {o.status === 'pending' && o.job_status === 'open' && (
+        <div style={{ marginTop: 10 }}>
+          <button className="btn danger sm" disabled={busy} onClick={(e) => withdraw(e, o.id)}>
+            <Icon name="x" size={14} /> Withdraw
+          </button>
+        </div>
+      )}
     </div>
   ));
 }
@@ -139,7 +219,7 @@ function AssignedJobs() {
 
   if (error) return <div className="alert error">{error}</div>;
   if (jobs === null) return <Loading />;
-  if (jobs.length === 0) return <div className="card"><Empty icon="📋" title="No accepted jobs yet">When a customer accepts your offer, the job appears here.</Empty></div>;
+  if (jobs.length === 0) return <div className="card"><Empty icon="briefcase" title="No accepted jobs yet">When a customer accepts your offer, the job appears here.</Empty></div>;
 
   return jobs.map((j) => (
     <div key={j.id} className="card tap" onClick={() => navigate(`/jobs/${j.id}`)}>

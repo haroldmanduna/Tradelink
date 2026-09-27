@@ -17,6 +17,9 @@ function shapeJob(r) {
     budget: Number(r.budget),
     status: r.status,
     accepted_offer_id: r.accepted_offer_id,
+    worker_marked_done: r.worker_marked_done || false,
+    worker_done_at: r.worker_done_at || null,
+    completion_note: r.completion_note || null,
     offer_count: r.offer_count != null ? Number(r.offer_count) : undefined,
     created_at: r.created_at,
     updated_at: r.updated_at,
@@ -226,6 +229,42 @@ router.patch('/:id/status', requireAuth, requireRole('customer'), async (req, re
       [status, jobId]
     );
     return res.json({ job: shapeJob({ ...rows[0], customer_name: undefined }) });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+// POST /api/jobs/:id/mark-done  (tradesperson) — the assigned worker marks the
+// work finished and leaves a completion note. The customer then confirms + rates.
+router.post('/:id/mark-done', requireAuth, requireRole('tradesperson'), async (req, res, next) => {
+  try {
+    const jobId = parseInt(req.params.id, 10);
+    const { note } = req.body || {};
+    const jr = await query(
+      `SELECT j.*, o.tradesperson_id AS worker_id
+         FROM jobs j LEFT JOIN offers o ON o.id = j.accepted_offer_id
+        WHERE j.id = $1`,
+      [jobId]
+    );
+    const job = jr.rows[0];
+    if (!job) return res.status(404).json({ error: 'Job not found.' });
+    if (job.worker_id !== req.user.id) {
+      return res.status(403).json({ error: 'You are not the assigned tradesperson for this job.' });
+    }
+    if (!['matched', 'in_progress'].includes(job.status)) {
+      return res.status(400).json({ error: `Cannot mark a "${job.status}" job as done.` });
+    }
+    const { rows } = await query(
+      `UPDATE jobs
+          SET worker_marked_done = true,
+              worker_done_at = now(),
+              completion_note = $1,
+              status = CASE WHEN status = 'matched' THEN 'in_progress' ELSE status END,
+              updated_at = now()
+        WHERE id = $2 RETURNING *`,
+      [note ? String(note).slice(0, 1000) : null, jobId]
+    );
+    return res.json({ job: shapeJob(rows[0]) });
   } catch (err) {
     return next(err);
   }

@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api, CATEGORY_LABELS } from '../api.js';
-import { StatusBadge, Empty, Loading, money, timeAgo } from '../components.jsx';
+import { StatusBadge, Empty, Loading, StatBar, money, timeAgo } from '../components.jsx';
 import { TradeIcon, Icon } from '../icons.jsx';
 
 export default function CustomerDashboard() {
   const [jobs, setJobs] = useState(null);
+  const [stats, setStats] = useState(null);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     api.get('/jobs/mine').then((d) => setJobs(d.jobs)).catch((e) => setError(e.message));
+    api.get('/stats').then((d) => setStats(d.stats)).catch(() => {});
   }, []);
 
   return (
@@ -22,6 +24,15 @@ export default function CustomerDashboard() {
         </div>
         <Link className="btn" to="/post"><Icon name="plus" size={16} /> Post a job</Link>
       </div>
+
+      {stats && (
+        <StatBar items={[
+          { v: stats.open, l: 'Open jobs' },
+          { v: stats.active, l: 'In progress' },
+          { v: stats.completed, l: 'Completed' },
+          { v: stats.offers_received, l: 'Offers received' },
+        ]} />
+      )}
 
       {error && <div className="alert error">{error}</div>}
       {jobs === null && <Loading />}

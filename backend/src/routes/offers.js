@@ -132,6 +132,26 @@ router.post('/offers/:id/accept', requireAuth, requireRole('customer'), async (r
   }
 });
 
+// POST /api/offers/:id/withdraw (tradesperson) — retract a pending offer.
+router.post('/offers/:id/withdraw', requireAuth, requireRole('tradesperson'), async (req, res, next) => {
+  try {
+    const offerId = parseInt(req.params.id, 10);
+    const { rows } = await query('SELECT * FROM offers WHERE id = $1', [offerId]);
+    const offer = rows[0];
+    if (!offer) return res.status(404).json({ error: 'Offer not found.' });
+    if (offer.tradesperson_id !== req.user.id) {
+      return res.status(403).json({ error: 'This is not your offer.' });
+    }
+    if (offer.status !== 'pending') {
+      return res.status(400).json({ error: `Cannot withdraw a "${offer.status}" offer.` });
+    }
+    await query(`UPDATE offers SET status = 'withdrawn' WHERE id = $1`, [offerId]);
+    return res.json({ ok: true });
+  } catch (err) {
+    return next(err);
+  }
+});
+
 // GET /api/offers/mine — tradesperson: all offers I've made
 router.get('/offers/mine', requireAuth, requireRole('tradesperson'), async (req, res, next) => {
   try {

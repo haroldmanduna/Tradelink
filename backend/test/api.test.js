@@ -223,6 +223,70 @@ async function run() {
   const o = r.data.job.offers.find((x) => x.tradesperson_id === elec2.user.id);
   assert(o && o.rating === 5 && o.jobs_done === 1, 'offer surfaces tradesperson rating for customer decision');
 
+  console.log('\n-- Worker mark-done + completion note --');
+  r = await api('POST', '/api/jobs', { token: customer.token, body: {
+    category: 'electrician', description: 'Ceiling fan install', location: 'Bulawayo', budget: 40 }});
+  const job3 = r.data.job;
+  r = await api('POST', `/api/jobs/${job3.id}/offers`, { token: elec1.token, body: { price: 40 }});
+  r = await api('GET', `/api/jobs/${job3.id}`, { token: customer.token });
+  const off3 = r.data.job.offers[0];
+  await api('POST', `/api/offers/${off3.id}/accept`, { token: customer.token });
+  r = await api('POST', `/api/jobs/${job3.id}/mark-done`, { token: elec2.token, body: { note: 'x' }});
+  assert(r.status === 403, 'non-assigned tradesperson cannot mark job done');
+  r = await api('POST', `/api/jobs/${job3.id}/mark-done`, { token: elec1.token, body: { note: 'All wired and tested.' }});
+  assert(r.status === 200 && r.data.job.worker_marked_done === true && r.data.job.completion_note === 'All wired and tested.' && r.data.job.status === 'in_progress',
+    'assigned worker marks done -> in_progress + note saved');
+  r = await api('GET', `/api/jobs/${job3.id}`, { token: customer.token });
+  assert(r.data.job.worker_marked_done === true && r.data.job.completion_note === 'All wired and tested.',
+    'customer sees worker-done marker + completion note');
+  r = await api('PATCH', `/api/jobs/${job3.id}/status`, { token: customer.token, body: { status: 'completed' }});
+  assert(r.status === 200 && r.data.job.status === 'completed', 'customer confirms completion after worker marked done');
+  r = await api('POST', `/api/jobs/${job3.id}/rating`, { token: customer.token, body: { rating: 4, comment: 'Good work' }});
+  assert(r.status === 201, 'customer rates after two-sided completion');
+
+  console.log('\n-- Withdraw offer --');
+  r = await api('POST', '/api/jobs', { token: customer.token, body: {
+    category: 'electrician', description: 'Rewire garage', location: 'Bulawayo', budget: 200 }});
+  const job4 = r.data.job;
+  r = await api('POST', `/api/jobs/${job4.id}/offers`, { token: elec1.token, body: { price: 210 }});
+  const off4 = r.data.offer;
+  r = await api('POST', `/api/offers/${off4.id}/withdraw`, { token: elec2.token });
+  assert(r.status === 403, "cannot withdraw someone else's offer");
+  r = await api('POST', `/api/offers/${off4.id}/withdraw`, { token: elec1.token });
+  assert(r.status === 200, 'tradesperson withdraws own pending offer');
+  r = await api('POST', `/api/offers/${off4.id}/withdraw`, { token: elec1.token });
+  assert(r.status === 400, 'cannot withdraw an already-withdrawn offer');
+
+  console.log('\n-- Profile update --');
+  r = await api('PATCH', '/api/profile', { token: elec1.token, body: { skills: 'Wiring, solar, geysers', bio: '10 years experience.' }});
+  assert(r.status === 200 && r.data.profile.skills.includes('solar'), 'tradesperson updates profile');
+  r = await api('GET', '/api/auth/me', { token: elec1.token });
+  assert(r.data.user.profile.bio === '10 years experience.', 'profile change reflected in /me');
+  r = await api('PATCH', '/api/profile', { token: customer.token, body: { bio: 'x' }});
+  assert(r.status === 403, 'customer cannot update a tradesperson profile');
+
+  console.log('\n-- Stats --');
+  r = await api('GET', '/api/stats', { token: customer.token });
+  assert(r.status === 200 && typeof r.data.stats.completed === 'number' && typeof r.data.stats.offers_received === 'number', 'customer stats returned');
+  r = await api('GET', '/api/stats', { token: elec1.token });
+  assert(r.status === 200 && typeof r.data.stats.available === 'number' && typeof r.data.stats.pending_offers === 'number', 'tradesperson stats returned');
+
+  console.log('\n-- Support inbox --');
+  r = await api('POST', '/api/support', { body: { name: 'Jane', email: 'jane@mail.com', subject: 'Help', message: 'I need assistance' }});
+  assert(r.status === 201, 'support message accepted');
+  r = await api('POST', '/api/support', { body: { name: 'Jane', email: 'bad-email', subject: 'Help', message: 'hi there' }});
+  assert(r.status === 400, 'support rejects invalid email');
+  r = await api('POST', '/api/support', { body: { name: '', email: '', subject: '', message: '' }});
+  assert(r.status === 400, 'support rejects empty fields');
+
+  console.log('\n-- Rate limiting --');
+  let got429 = false;
+  for (let i = 0; i < 20; i++) {
+    const rr = await api('POST', '/api/auth/login', { body: { identifier: 'nobody@example.com', password: 'wrong' }});
+    if (rr.status === 429) { got429 = true; break; }
+  }
+  assert(got429, 'auth endpoint rate-limits repeated failed logins (429)');
+
   console.log('\n=== Results ===');
   console.log(`  PASSED: ${passed}`);
   console.log(`  FAILED: ${failed}`);
