@@ -159,3 +159,22 @@ CREATE TABLE IF NOT EXISTS admin_actions (
 );
 CREATE INDEX IF NOT EXISTS idx_admin_actions_time ON admin_actions(created_at DESC);
 
+-- Supabase hardening ---------------------------------------------------------
+-- Our backend connects as the table OWNER (postgres role), which bypasses RLS,
+-- so the app keeps full access. Enabling RLS with NO policies means the public
+-- PostgREST roles (anon / authenticated) can read/write NOTHING through the
+-- Supabase auto-API. Safe & idempotent everywhere (owner/superuser bypass RLS).
+DO $$
+DECLARE t text;
+BEGIN
+  FOREACH t IN ARRAY ARRAY[
+    'users','tradesperson_profiles','jobs','offers','ratings',
+    'credit_ledger','paynow_topups','support_messages','admin_actions'
+  ] LOOP
+    IF EXISTS (SELECT 1 FROM information_schema.tables
+              WHERE table_schema='public' AND table_name=t) THEN
+      EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY;', t);
+    END IF;
+  END LOOP;
+END$$;
+
