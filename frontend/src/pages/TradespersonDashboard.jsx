@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { api, CATEGORY_LABELS, tradeLabel } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { Stars, StatusBadge, Empty, Loading, StatBar, Alert, money, timeAgo } from '../components.jsx';
@@ -28,6 +28,7 @@ export default function TradespersonDashboard() {
             {user.profile?.verified && <span className="badge verified"><Icon name="verified" size={12} /> Verified</span>}
           </p>
         </div>
+        <Link className="btn secondary sm" to="/wallet"><Icon name="wallet" size={16} /> Credits</Link>
       </div>
 
       {stats && (

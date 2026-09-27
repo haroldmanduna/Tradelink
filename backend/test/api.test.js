@@ -307,6 +307,31 @@ async function run() {
   assert(r.data.categories.includes('tiler') && r.data.categories.includes('other') && r.data.categories.length >= 20,
     'categories list expanded (20+) and includes "other"');
 
+  console.log('\n-- Credits wallet --');
+  // Wallet starts empty with bundles + config flags exposed.
+  r = await api('GET', '/api/wallet', { token: elec1.token });
+  assert(r.status === 200 && r.data.balance === 0, 'new wallet balance is 0');
+  assert(Array.isArray(r.data.bundles) && r.data.bundles.length >= 3
+    && r.data.bundles.every((b) => b.usd && b.credits && b.id), 'wallet exposes credit bundles');
+  assert(r.data.billingEnabled === false, 'billing disabled at launch (free)');
+  assert(Array.isArray(r.data.ledger), 'wallet returns a ledger array');
+
+  // Customers get a wallet too (harmless) but bundle validation still applies.
+  r = await api('POST', '/api/wallet/topup', { token: elec1.token, body: { bundleId: 'nope' } });
+  assert(r.status === 400, 'top-up with unknown bundle rejected (400)');
+
+  // Mobile method needs a valid phone (validated before any network call).
+  r = await api('POST', '/api/wallet/topup', { token: elec1.token, body: { bundleId: 'standard', method: 'ecocash', phone: '123' } });
+  assert(r.status === 400, 'ecocash top-up with bad phone rejected (400)');
+
+  // Unsupported method rejected.
+  r = await api('POST', '/api/wallet/topup', { token: elec1.token, body: { bundleId: 'standard', method: 'bitcoin' } });
+  assert(r.status === 400, 'unsupported top-up method rejected (400)');
+
+  // Auth required.
+  r = await api('GET', '/api/wallet');
+  assert(r.status === 401, 'wallet requires authentication (401)');
+
   console.log('\n-- Rate limiting --');
   let got429 = false;
   for (let i = 0; i < 20; i++) {

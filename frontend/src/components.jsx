@@ -40,7 +40,7 @@ export function StatusBadge({ status }) {
   return <span className={`badge ${status}`}>{label}</span>;
 }
 
-const ALERT_ICON = { error: 'x', ok: 'check', info: 'chat' };
+const ALERT_ICON = { error: 'x', ok: 'check', success: 'check', warn: 'shield', info: 'chat' };
 export function Alert({ kind = 'info', children }) {
   if (!children) return null;
   return (

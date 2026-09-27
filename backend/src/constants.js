@@ -32,6 +32,40 @@ const CATEGORIES = [
   'other',
 ];
 
+// --- Credits / billing -----------------------------------------------------
+// Wallet holds an integer credit balance. Bundles convert USD -> credits, with
+// small bonuses on larger bundles (kept deliberately cheap). Prices are USD.
+const CREDIT_BUNDLES = [
+  { id: 'starter',  usd: 2,  credits: 20,  label: 'Starter'  },
+  { id: 'standard', usd: 5,  credits: 55,  label: 'Standard', bonus: '+5 free' },
+  { id: 'pro',      usd: 10, credits: 120, label: 'Pro',      bonus: '+20 free' },
+  { id: 'max',      usd: 20, credits: 260, label: 'Max',      bonus: '+60 free' },
+];
+
+// Fee (in credits) charged to a tradesperson when their offer is accepted,
+// tiered by the agreed price so small jobs cost little. Ready for when billing
+// is switched on; while BILLING_ENABLED is false the fee is always 0 (free).
+const FEE_BANDS = [
+  { maxPrice: 50,       credits: 5  },
+  { maxPrice: 150,      credits: 15 },
+  { maxPrice: 400,      credits: 30 },
+  { maxPrice: Infinity, credits: 50 },
+];
+
+// Master switch. Launch FREE: keep this false so no credits are ever deducted.
+// Flip to true (env BILLING_ENABLED=1) once liquidity + earnings are proven.
+const BILLING_ENABLED = process.env.BILLING_ENABLED === '1';
+
+function feeForPrice(price) {
+  if (!BILLING_ENABLED) return 0;
+  const band = FEE_BANDS.find((b) => Number(price) <= b.maxPrice) || FEE_BANDS[FEE_BANDS.length - 1];
+  return band.credits;
+}
+
+function bundleById(id) {
+  return CREDIT_BUNDLES.find((b) => b.id === id) || null;
+}
+
 const JOB_STATUS = ['open', 'matched', 'in_progress', 'completed', 'cancelled'];
 
 // Allowed forward transitions initiated by the customer.
@@ -41,4 +75,13 @@ const JOB_TRANSITIONS = {
   open: ['cancelled'],
 };
 
-module.exports = { CATEGORIES, JOB_STATUS, JOB_TRANSITIONS };
+module.exports = {
+  CATEGORIES,
+  JOB_STATUS,
+  JOB_TRANSITIONS,
+  CREDIT_BUNDLES,
+  FEE_BANDS,
+  BILLING_ENABLED,
+  feeForPrice,
+  bundleById,
+};

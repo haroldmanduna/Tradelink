@@ -9,6 +9,7 @@ import CustomerDashboard from './pages/CustomerDashboard.jsx';
 import PostJob from './pages/PostJob.jsx';
 import JobDetail from './pages/JobDetail.jsx';
 import TradespersonDashboard from './pages/TradespersonDashboard.jsx';
+import Wallet from './pages/Wallet.jsx';
 import Support from './pages/Support.jsx';
 import { Terms, Privacy, Cookies } from './pages/Legal.jsx';
 
@@ -138,6 +139,7 @@ export default function App() {
           <Route path="/post" element={<Protected role="customer"><PostJob /></Protected>} />
           <Route path="/jobs/:id" element={<Protected><JobDetail /></Protected>} />
           <Route path="/pro" element={<Protected role="tradesperson"><TradespersonDashboard /></Protected>} />
+          <Route path="/wallet" element={<Protected role="tradesperson"><Wallet /></Protected>} />
           <Route path="/support" element={<Support />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />

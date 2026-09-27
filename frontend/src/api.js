@@ -80,4 +80,12 @@ export function tradeLabel(category, custom) {
   return CATEGORY_LABELS[category] || category;
 }
 
+// Friendly labels for the top-up payment methods.
+export const TOPUP_METHOD_LABELS = {
+  web: 'Card / All methods (via Paynow)',
+  ecocash: 'EcoCash',
+  onemoney: 'OneMoney',
+  innbucks: 'InnBucks',
+};
+
 

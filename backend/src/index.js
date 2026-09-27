@@ -12,6 +12,7 @@ const { router: jobsRouter } = require('./routes/jobs');
 const { router: offersRouter } = require('./routes/offers');
 const { router: ratingsRouter } = require('./routes/ratings');
 const { router: miscRouter } = require('./routes/misc');
+const { router: walletRouter } = require('./routes/wallet');
 const { apiLimiter, authLimiter, writeLimiter } = require('./ratelimit');
 
 const app = express();
@@ -34,6 +35,7 @@ app.use('/api/jobs', jobsRouter);
 app.use('/api', offersRouter);   // /api/jobs/:id/offers, /api/offers/:id/accept, /api/offers/mine
 app.use('/api', ratingsRouter);  // /api/jobs/:id/rating
 app.use('/api', miscRouter);     // /api/profile, /api/stats, /api/support
+app.use('/api', walletRouter);   // /api/wallet, /api/wallet/topup, /api/paynow/result
 
 // --- Serve frontend build in production (single-service deploy) ---
 const distDir = path.join(__dirname, '..', '..', 'frontend', 'dist');

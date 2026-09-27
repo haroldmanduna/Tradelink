@@ -87,6 +87,38 @@ ALTER TABLE jobs ADD COLUMN IF NOT EXISTS completion_note TEXT;
 ALTER TABLE jobs ADD COLUMN IF NOT EXISTS custom_category TEXT;
 ALTER TABLE tradesperson_profiles ADD COLUMN IF NOT EXISTS custom_category TEXT;
 
+-- Credits wallet: balance lives on the user; ledger records every change ------
+ALTER TABLE users ADD COLUMN IF NOT EXISTS credit_balance INTEGER NOT NULL DEFAULT 0;
+
+CREATE TABLE IF NOT EXISTS credit_ledger (
+  id            SERIAL PRIMARY KEY,
+  user_id       INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  delta         INTEGER NOT NULL,             -- +credits (top-up) / -credits (fee)
+  reason        TEXT NOT NULL,                -- 'topup' | 'job_fee' | 'adjustment' | 'welcome'
+  balance_after INTEGER NOT NULL,
+  ref           TEXT,                         -- e.g. topup reference or job id
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_ledger_user ON credit_ledger(user_id, created_at DESC);
+
+-- Paynow top-up attempts -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS paynow_topups (
+  id           SERIAL PRIMARY KEY,
+  user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  reference    TEXT NOT NULL UNIQUE,          -- our unique reference sent to Paynow
+  bundle_id    TEXT NOT NULL,
+  amount_usd   NUMERIC(10,2) NOT NULL,
+  credits      INTEGER NOT NULL,
+  method       TEXT NOT NULL DEFAULT 'web',   -- 'web' | 'ecocash' | 'onemoney' | 'innbucks'
+  poll_url     TEXT,
+  paynow_ref   TEXT,
+  status       TEXT NOT NULL DEFAULT 'Created',
+  credited     BOOLEAN NOT NULL DEFAULT false, -- guards against double-crediting
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_topups_user ON paynow_topups(user_id, created_at DESC);
+
 CREATE TABLE IF NOT EXISTS support_messages (
   id         SERIAL PRIMARY KEY,
   user_id    INTEGER REFERENCES users(id) ON DELETE SET NULL,
