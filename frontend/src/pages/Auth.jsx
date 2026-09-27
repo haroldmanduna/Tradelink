@@ -207,7 +207,9 @@ export default function Auth({ mode }) {
           </button>
         </form>
 
-        <GoogleSignIn onCredential={handleGoogle} register={isRegister} />
+        {/* Google Sign-In temporarily disabled — re-enable by restoring:
+            <GoogleSignIn onCredential={handleGoogle} register={isRegister} />
+            and setting GOOGLE_CLIENT_ID on the server. */}
 
         <div className="divider" />
         <p className="small muted" style={{ textAlign: 'center', margin: 0 }}>
