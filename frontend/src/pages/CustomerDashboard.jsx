@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { api, CATEGORY_LABELS, CATEGORY_ICON } from '../api.js';
-import { StatusBadge, Empty, money, timeAgo } from '../components.jsx';
+import { api, CATEGORY_LABELS } from '../api.js';
+import { StatusBadge, Empty, Loading, money, timeAgo } from '../components.jsx';
+import { TradeIcon, Icon } from '../icons.jsx';
 
 export default function CustomerDashboard() {
   const [jobs, setJobs] = useState(null);
@@ -19,15 +20,15 @@ export default function CustomerDashboard() {
           <h1 className="h1">My jobs</h1>
           <p className="sub" style={{ margin: 0 }}>Track your posted jobs and offers.</p>
         </div>
-        <Link className="btn" to="/post">+ Post a job</Link>
+        <Link className="btn" to="/post"><Icon name="plus" size={16} /> Post a job</Link>
       </div>
 
       {error && <div className="alert error">{error}</div>}
-      {jobs === null && <div className="loading">Loading…</div>}
+      {jobs === null && <Loading />}
 
       {jobs && jobs.length === 0 && (
         <div className="card">
-          <Empty icon="🧰" title="No jobs yet">
+          <Empty icon="briefcase" title="No jobs yet">
             Post your first job and start receiving offers from local tradespeople.
             <div style={{ marginTop: 16 }}>
               <Link className="btn" to="/post">Post a job</Link>
@@ -37,9 +38,9 @@ export default function CustomerDashboard() {
       )}
 
       {jobs && jobs.map((j) => (
-        <div key={j.id} className="card" style={{ cursor: 'pointer' }} onClick={() => navigate(`/jobs/${j.id}`)}>
+        <div key={j.id} className="card tap" onClick={() => navigate(`/jobs/${j.id}`)}>
           <div className="job-row">
-            <div className="job-icon">{CATEGORY_ICON[j.category]}</div>
+            <div className="job-icon"><TradeIcon name={j.category} size={24} /></div>
             <div style={{ flex: 1 }}>
               <div className="flex between wrap">
                 <strong>{CATEGORY_LABELS[j.category]}</strong>

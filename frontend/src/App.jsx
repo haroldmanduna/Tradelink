@@ -1,6 +1,8 @@
 import React from 'react';
-import { Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from './auth.jsx';
+import { Logo, Icon } from './icons.jsx';
+import { Loading } from './components.jsx';
 import Landing from './pages/Landing.jsx';
 import Auth from './pages/Auth.jsx';
 import CustomerDashboard from './pages/CustomerDashboard.jsx';
@@ -11,10 +13,12 @@ import TradespersonDashboard from './pages/TradespersonDashboard.jsx';
 function Nav() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const onDark = !user && location.pathname === '/';
   return (
-    <nav className="nav">
+    <nav className={`nav ${onDark ? 'on-dark' : ''}`}>
       <Link to="/" className="brand">
-        <span className="logo">⚒</span>
+        <Logo size={30} />
         <span>Trade<span className="accent">Link</span></span>
       </Link>
       <div className="nav-right">
@@ -26,7 +30,9 @@ function Nav() {
             <Link className="btn secondary sm" to={user.role === 'customer' ? '/customer' : '/pro'}>
               Dashboard
             </Link>
-            <button className="btn ghost sm" onClick={() => { logout(); navigate('/'); }}>Log out</button>
+            <button className="btn ghost sm" onClick={() => { logout(); navigate('/'); }}>
+              <Icon name="logout" size={16} /> Log out
+            </button>
           </>
         ) : (
           <>
@@ -41,7 +47,7 @@ function Nav() {
 
 function Protected({ role, children }) {
   const { user, loading } = useAuth();
-  if (loading) return <div className="loading">Loading…</div>;
+  if (loading) return <Loading />;
   if (!user) return <Navigate to="/login" replace />;
   if (role && user.role !== role) {
     return <Navigate to={user.role === 'customer' ? '/customer' : '/pro'} replace />;
@@ -51,7 +57,7 @@ function Protected({ role, children }) {
 
 function HomeRedirect() {
   const { user, loading } = useAuth();
-  if (loading) return <div className="loading">Loading…</div>;
+  if (loading) return <Loading />;
   if (user) return <Navigate to={user.role === 'customer' ? '/customer' : '/pro'} replace />;
   return <Landing />;
 }

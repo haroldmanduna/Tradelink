@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api, CATEGORY_LABELS, CATEGORY_ICON } from '../api.js';
+import { api, CATEGORY_LABELS } from '../api.js';
 import { useAuth } from '../auth.jsx';
-import { Stars, StatusBadge, Empty, money, timeAgo } from '../components.jsx';
+import { Stars, StatusBadge, Empty, Loading, money, timeAgo } from '../components.jsx';
+import { TradeIcon, Icon } from '../icons.jsx';
 
 export default function TradespersonDashboard() {
   const { user } = useAuth();
@@ -12,11 +13,14 @@ export default function TradespersonDashboard() {
     <div className="container">
       <div className="flex between wrap" style={{ marginBottom: 6 }}>
         <div>
-          <h1 className="h1">{CATEGORY_ICON[user.profile?.category]} {CATEGORY_LABELS[user.profile?.category]} dashboard</h1>
-          <p className="sub" style={{ margin: 0 }}>
+          <h1 className="h1 flex" style={{ gap: 10 }}>
+            <span className="job-icon" style={{ width: 40, height: 40 }}><TradeIcon name={user.profile?.category} size={22} /></span>
+            {CATEGORY_LABELS[user.profile?.category]} dashboard
+          </h1>
+          <p className="sub flex wrap" style={{ margin: '8px 0 0', gap: 8 }}>
             <Stars value={user.profile?.rating || 0} count={user.profile?.rating_count || 0} />
             {' · '}{user.profile?.jobs_done || 0} jobs completed
-            {user.profile?.verified && ' · ✓ Verified'}
+            {user.profile?.verified && <span className="badge verified"><Icon name="verified" size={12} /> Verified</span>}
           </p>
         </div>
       </div>
@@ -52,8 +56,8 @@ function OpenJobs({ myCategory }) {
       <div className="flex wrap" style={{ gap: 8, marginBottom: 16 }}>
         {Object.keys(CATEGORY_LABELS).map((c) => (
           <button key={c} className={`chip ${category === c ? 'active' : ''}`} onClick={() => setCategory(c)}>
-            {CATEGORY_ICON[c]} {CATEGORY_LABELS[c]}
-            {c === myCategory ? ' ★' : ''}
+            <TradeIcon name={c} size={17} /> {CATEGORY_LABELS[c]}
+            {c === myCategory ? <Icon name="star" size={13} style={{ color: 'inherit' }} /> : null}
           </button>
         ))}
       </div>
@@ -62,15 +66,15 @@ function OpenJobs({ myCategory }) {
       {category !== myCategory && (
         <div className="alert info">You can browse any category, but you can only send offers on <strong>{CATEGORY_LABELS[myCategory]}</strong> jobs.</div>
       )}
-      {jobs === null && <div className="loading">Loading…</div>}
+      {jobs === null && <Loading />}
       {jobs && jobs.length === 0 && (
         <div className="card"><Empty icon="🔍" title="No open jobs here right now">Check back soon or try another category.</Empty></div>
       )}
 
       {jobs && jobs.map((j) => (
-        <div key={j.id} className="card" style={{ cursor: 'pointer' }} onClick={() => navigate(`/jobs/${j.id}`)}>
+        <div key={j.id} className="card tap" onClick={() => navigate(`/jobs/${j.id}`)}>
           <div className="job-row">
-            <div className="job-icon">{CATEGORY_ICON[j.category]}</div>
+            <div className="job-icon"><TradeIcon name={j.category} size={24} /></div>
             <div style={{ flex: 1 }}>
               <div className="flex between wrap">
                 <strong>{CATEGORY_LABELS[j.category]} · {j.location}</strong>
@@ -105,11 +109,11 @@ function MyOffers() {
   }, []);
 
   if (error) return <div className="alert error">{error}</div>;
-  if (offers === null) return <div className="loading">Loading…</div>;
+  if (offers === null) return <Loading />;
   if (offers.length === 0) return <div className="card"><Empty icon="💬" title="No offers yet">Browse open jobs and send your first offer.</Empty></div>;
 
   return offers.map((o) => (
-    <div key={o.id} className="card" style={{ cursor: 'pointer' }} onClick={() => navigate(`/jobs/${o.job_id}`)}>
+    <div key={o.id} className="card tap" onClick={() => navigate(`/jobs/${o.job_id}`)}>
       <div className="flex between wrap">
         <div>
           <strong>{CATEGORY_LABELS[o.category]} · {o.location}</strong>
@@ -134,13 +138,13 @@ function AssignedJobs() {
   }, []);
 
   if (error) return <div className="alert error">{error}</div>;
-  if (jobs === null) return <div className="loading">Loading…</div>;
+  if (jobs === null) return <Loading />;
   if (jobs.length === 0) return <div className="card"><Empty icon="📋" title="No accepted jobs yet">When a customer accepts your offer, the job appears here.</Empty></div>;
 
   return jobs.map((j) => (
-    <div key={j.id} className="card" style={{ cursor: 'pointer' }} onClick={() => navigate(`/jobs/${j.id}`)}>
+    <div key={j.id} className="card tap" onClick={() => navigate(`/jobs/${j.id}`)}>
       <div className="job-row">
-        <div className="job-icon">{CATEGORY_ICON[j.category]}</div>
+        <div className="job-icon"><TradeIcon name={j.category} size={24} /></div>
         <div style={{ flex: 1 }}>
           <div className="flex between wrap">
             <strong>{CATEGORY_LABELS[j.category]} · {j.location}</strong>

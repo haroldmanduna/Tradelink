@@ -53,13 +53,4 @@ export const CATEGORY_LABELS = {
   builder: 'Builder',
 };
 
-export const CATEGORY_ICON = {
-  electrician: '⚡',
-  plumber: '🔧',
-  mechanic: '🔩',
-  handyman: '🛠️',
-  carpenter: '🪚',
-  painter: '🎨',
-  welder: '🔥',
-  builder: '🧱',
-};
+

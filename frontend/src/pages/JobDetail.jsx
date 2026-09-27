@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { api, CATEGORY_LABELS, CATEGORY_ICON } from '../api.js';
+import { api, CATEGORY_LABELS } from '../api.js';
 import { useAuth } from '../auth.jsx';
-import { Stars, StarInput, StatusBadge, Alert, money, timeAgo } from '../components.jsx';
+import { Stars, StarInput, StatusBadge, Alert, Loading, money, timeAgo } from '../components.jsx';
+import { TradeIcon, Icon } from '../icons.jsx';
 
 export default function JobDetail() {
   const { id } = useParams();
@@ -25,7 +26,7 @@ export default function JobDetail() {
   useEffect(() => { load(); }, [load]);
 
   if (error) return <div className="container"><div className="alert error">{error}</div><Link to="/">← Home</Link></div>;
-  if (!job) return <div className="loading">Loading…</div>;
+  if (!job) return <Loading />;
 
   const isCustomer = user.role === 'customer';
   const isOwner = isCustomer && job.customer_id === user.id;
@@ -45,11 +46,11 @@ export default function JobDetail() {
 
   return (
     <div className="container" style={{ maxWidth: 720 }}>
-      <Link to={isCustomer ? '/customer' : '/pro'} className="small">← Back</Link>
+      <Link to={isCustomer ? '/customer' : '/pro'} className="small flex" style={{ display: 'inline-flex', width: 'auto' }}><Icon name="arrowLeft" size={15} /> Back</Link>
 
       <div className="card" style={{ marginTop: 12 }}>
         <div className="job-row">
-          <div className="job-icon">{CATEGORY_ICON[job.category]}</div>
+          <div className="job-icon"><TradeIcon name={job.category} size={24} /></div>
           <div style={{ flex: 1 }}>
             <div className="flex between wrap">
               <strong style={{ fontSize: 18 }}>{CATEGORY_LABELS[job.category]}</strong>
@@ -66,7 +67,10 @@ export default function JobDetail() {
 
         {job.customer_phone && (
           <div className="alert ok" style={{ marginTop: 14, marginBottom: 0 }}>
-            📞 Contact: <strong>{job.customer_phone}</strong> — arrange the work &amp; payment directly.
+            <div className="contact-box">
+              <span className="ic"><Icon name="phone" size={18} /></span>
+              <span>Contact: <strong>{job.customer_phone}</strong> — arrange the work &amp; payment directly.</span>
+            </div>
           </div>
         )}
       </div>
@@ -117,7 +121,7 @@ function CustomerView({ job, act, busy }) {
             <div className="flex wrap">
               <button className="btn" disabled={busy}
                 onClick={() => act(() => api.patch(`/jobs/${job.id}/status`, { status: 'in_progress' }), 'Marked as in progress.')}>
-                ▶ Start work
+                <Icon name="play" size={15} /> Start work
               </button>
               <button className="btn danger" disabled={busy}
                 onClick={() => act(() => api.patch(`/jobs/${job.id}/status`, { status: 'cancelled' }), 'Job cancelled.')}>
@@ -129,7 +133,7 @@ function CustomerView({ job, act, busy }) {
           {job.status === 'in_progress' && (
             <button className="btn accent" disabled={busy}
               onClick={() => act(() => api.patch(`/jobs/${job.id}/status`, { status: 'completed' }), 'Job completed! Please leave a rating.')}>
-              ✓ Mark as completed
+              <Icon name="check" size={16} /> Mark as completed
             </button>
           )}
 
@@ -227,7 +231,7 @@ function OfferCard({ o, best, accepted, action }) {
       <div className="flex between wrap">
         <div>
           <strong>{o.tradesperson_name}</strong>{' '}
-          {o.verified && <span className="badge verified">✓ Verified</span>}
+          {o.verified && <span className="badge verified"><Icon name="verified" size={12} /> Verified</span>}
           <div className="small muted">{o.tradesperson_location} · {o.jobs_done} jobs done</div>
           <div style={{ marginTop: 4 }}><Stars value={o.rating} count={o.rating_count} /></div>
         </div>

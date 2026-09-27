@@ -1,15 +1,16 @@
 import React from 'react';
+import { Icon } from './icons.jsx';
 
 export function Stars({ value = 0, count }) {
   const full = Math.round(value);
   return (
     <span className="stars" title={value ? `${Number(value).toFixed(1)} / 5` : 'No ratings yet'}>
       {[1, 2, 3, 4, 5].map((n) => (
-        <span key={n} className={n <= full ? '' : 'empty'}>★</span>
+        <Icon key={n} name="star" className={`s ${n <= full ? '' : 'empty'}`} size={15} />
       ))}
-      {count != null && <span className="muted small" style={{ marginLeft: 6 }}>
-        {count > 0 ? `${Number(value).toFixed(1)} (${count})` : 'New'}
-      </span>}
+      {count != null && (
+        <span className="rt">{count > 0 ? `${Number(value).toFixed(1)} (${count})` : 'New'}</span>
+      )}
     </span>
   );
 }
@@ -19,15 +20,16 @@ export function StarInput({ value, onChange }) {
   return (
     <div className="star-input" role="radiogroup" aria-label="Rating">
       {[1, 2, 3, 4, 5].map((n) => (
-        <span
+        <Icon
           key={n}
-          className={(hover || value) >= n ? 'on' : ''}
+          name="star"
+          size={34}
+          className={`s ${(hover || value) >= n ? 'on' : ''}`}
+          style={{ cursor: 'pointer' }}
           onMouseEnter={() => setHover(n)}
           onMouseLeave={() => setHover(0)}
           onClick={() => onChange(n)}
-          role="radio"
-          aria-checked={value === n}
-        >★</span>
+        />
       ))}
     </div>
   );
@@ -38,19 +40,29 @@ export function StatusBadge({ status }) {
   return <span className={`badge ${status}`}>{label}</span>;
 }
 
+const ALERT_ICON = { error: 'x', ok: 'check', info: 'chat' };
 export function Alert({ kind = 'info', children }) {
   if (!children) return null;
-  return <div className={`alert ${kind}`}>{children}</div>;
-}
-
-export function Empty({ icon = '📭', title, children }) {
   return (
-    <div className="empty">
-      <div className="big">{icon}</div>
-      <div style={{ fontWeight: 700, color: '#334155', marginBottom: 4 }}>{title}</div>
+    <div className={`alert ${kind}`}>
+      <Icon name={ALERT_ICON[kind] || 'chat'} size={17} />
       <div>{children}</div>
     </div>
   );
+}
+
+export function Empty({ icon = 'briefcase', title, children }) {
+  return (
+    <div className="empty">
+      <div className="big"><Icon name={icon} size={26} /></div>
+      <div className="t">{title}</div>
+      <div>{children}</div>
+    </div>
+  );
+}
+
+export function Loading() {
+  return <div className="loading"><div className="spinner" />Loading…</div>;
 }
 
 export function money(n) {

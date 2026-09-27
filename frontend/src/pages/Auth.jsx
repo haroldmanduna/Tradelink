@@ -3,6 +3,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
 import { CATEGORY_LABELS } from '../api.js';
 import { Alert } from '../components.jsx';
+import { Icon } from '../icons.jsx';
 
 export default function Auth({ mode }) {
   const isRegister = mode === 'register';
@@ -57,12 +58,18 @@ export default function Auth({ mode }) {
         {isRegister && (
           <div className="role-toggle">
             <button type="button" className={role === 'customer' ? 'active' : ''} onClick={() => setRole('customer')}>
-              <div className="rt-title">🙋 I need work done</div>
-              <div className="rt-desc">Post jobs, get offers</div>
+              <span className="ric"><Icon name="doc" size={18} /></span>
+              <span>
+                <div className="rt-title">I need work done</div>
+                <div className="rt-desc">Post jobs, get offers</div>
+              </span>
             </button>
             <button type="button" className={role === 'tradesperson' ? 'active' : ''} onClick={() => setRole('tradesperson')}>
-              <div className="rt-title">⚒ I'm a tradesperson</div>
-              <div className="rt-desc">Find jobs, send offers</div>
+              <span className="ric"><Icon name="briefcase" size={18} /></span>
+              <span>
+                <div className="rt-title">I'm a tradesperson</div>
+                <div className="rt-desc">Find jobs, send offers</div>
+              </span>
             </button>
           </div>
         )}

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { api, CATEGORY_LABELS, CATEGORY_ICON } from '../api.js';
+import { api, CATEGORY_LABELS } from '../api.js';
 import { Alert } from '../components.jsx';
+import { TradeIcon, Icon } from '../icons.jsx';
 
 export default function PostJob() {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ export default function PostJob() {
 
   return (
     <div className="container" style={{ maxWidth: 640 }}>
-      <Link to="/customer" className="small">← Back to my jobs</Link>
+      <Link to="/customer" className="small flex" style={{ display: 'inline-flex', width: 'auto' }}><Icon name="arrowLeft" size={15} /> Back to my jobs</Link>
       <h1 className="h1" style={{ marginTop: 12 }}>Post a job</h1>
       <p className="sub">Tell us what you need. Matching tradespeople will send you offers.</p>
 
@@ -45,7 +46,7 @@ export default function PostJob() {
                 <button type="button" key={c}
                   className={`chip ${form.category === c ? 'active' : ''}`}
                   onClick={() => upd('category', c)}>
-                  {CATEGORY_ICON[c]} {CATEGORY_LABELS[c]}
+                  <TradeIcon name={c} size={17} /> {CATEGORY_LABELS[c]}
                 </button>
               ))}
             </div>
