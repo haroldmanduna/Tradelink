@@ -141,6 +141,8 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS is_superadmin    BOOLEAN NOT NULL DEF
 ALTER TABLE users ADD COLUMN IF NOT EXISTS suspended        BOOLEAN NOT NULL DEFAULT false;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS suspended_at     TIMESTAMPTZ;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS suspended_reason TEXT;
+-- Google sign-in: link a Google account id to a user (nullable = password user).
+ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id        TEXT UNIQUE;
 
 -- Only ONE superadmin can ever exist, and it can never be deleted while flagged.
 CREATE UNIQUE INDEX IF NOT EXISTS uniq_superadmin ON users (is_superadmin) WHERE is_superadmin;

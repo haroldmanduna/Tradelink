@@ -38,6 +38,13 @@ export function AuthProvider({ children }) {
     return user;
   }
 
+  async function loginWithGoogle(credential, role, category) {
+    const { token, user } = await api.post('/auth/google', { credential, role, category });
+    setToken(token);
+    setUser(user);
+    return user;
+  }
+
   function logout() {
     setToken(null);
     setUser(null);
@@ -51,7 +58,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refresh }}>
+    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, logout, refresh }}>
       {children}
     </AuthContext.Provider>
   );

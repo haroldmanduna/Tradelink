@@ -1,14 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
-import { CATEGORY_LABELS } from '../api.js';
+import { api, CATEGORY_LABELS } from '../api.js';
 import { Alert, LocationSelect } from '../components.jsx';
 import { DEFAULT_LOCATION } from '../locations.js';
 import { Icon } from '../icons.jsx';
 
+function homePath(user) {
+  if (user.role === 'admin') return '/admin';
+  return user.role === 'customer' ? '/customer' : '/pro';
+}
+
+// Loads Google Identity Services once and reports when it's ready.
+function useGoogleScript() {
+  const [ready, setReady] = useState(!!(window.google && window.google.accounts));
+  useEffect(() => {
+    if (window.google && window.google.accounts) { setReady(true); return; }
+    let timer;
+    const existing = document.getElementById('gsi-script');
+    if (existing) {
+      timer = setInterval(() => { if (window.google && window.google.accounts) { setReady(true); clearInterval(timer); } }, 120);
+      return () => clearInterval(timer);
+    }
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.async = true; s.defer = true; s.id = 'gsi-script';
+    s.onload = () => setReady(true);
+    document.head.appendChild(s);
+  }, []);
+  return ready;
+}
+
+// Renders the official "Sign in with Google" button — only if the backend has a
+// Google client id configured. Otherwise renders nothing (feature dormant).
+function GoogleSignIn({ onCredential, register }) {
+  const [clientId, setClientId] = useState(null);
+  const ready = useGoogleScript();
+  const divRef = useRef(null);
+  const cbRef = useRef(onCredential);
+  cbRef.current = onCredential;
+
+  useEffect(() => { api.get('/meta/config').then((c) => setClientId(c.googleClientId)).catch(() => {}); }, []);
+
+  useEffect(() => {
+    if (!ready || !clientId || !divRef.current || !(window.google && window.google.accounts)) return;
+    window.google.accounts.id.initialize({ client_id: clientId, callback: (resp) => cbRef.current(resp.credential) });
+    divRef.current.innerHTML = '';
+    window.google.accounts.id.renderButton(divRef.current, {
+      theme: 'outline', size: 'large', shape: 'pill', width: 300,
+      text: register ? 'signup_with' : 'signin_with',
+    });
+  }, [ready, clientId, register]);
+
+  if (!clientId) return null;
+  return (
+    <>
+      <div className="or-divider"><span>or</span></div>
+      <div className="gsi-wrap"><div ref={divRef} /></div>
+    </>
+  );
+}
+
 export default function Auth({ mode }) {
   const isRegister = mode === 'register';
-  const { login, register } = useAuth();
+  const { login, register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -38,9 +93,27 @@ export default function Auth({ mode }) {
       } else {
         user = await login(form.identifier, form.password);
       }
-      navigate(user.role === 'customer' ? '/customer' : '/pro', { replace: true });
+      navigate(homePath(user), { replace: true });
     } catch (err) {
       setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleGoogle(credential) {
+    setError('');
+    setBusy(true);
+    try {
+      // On register, use the selected role (+ category for tradespeople).
+      const user = await loginWithGoogle(
+        credential,
+        isRegister ? role : undefined,
+        isRegister && role === 'tradesperson' ? form.category : undefined,
+      );
+      navigate(homePath(user), { replace: true });
+    } catch (err) {
+      setError(err.message || 'Google sign-in failed.');
     } finally {
       setBusy(false);
     }
@@ -133,6 +206,8 @@ export default function Auth({ mode }) {
             {busy ? 'Please wait…' : isRegister ? 'Create account' : 'Log in'}
           </button>
         </form>
+
+        <GoogleSignIn onCredential={handleGoogle} register={isRegister} />
 
         <div className="divider" />
         <p className="small muted" style={{ textAlign: 'center', margin: 0 }}>

@@ -31,6 +31,10 @@ app.use('/api/support', writeLimiter);
 // --- API routes ---
 app.get('/api/health', (req, res) => res.json({ ok: true, service: 'tradelink', time: new Date().toISOString() }));
 app.get('/api/meta/categories', (req, res) => res.json({ categories: CATEGORIES }));
+// Public runtime config for the frontend (e.g. Google sign-in client id).
+app.get('/api/meta/config', (req, res) => res.json({
+  googleClientId: process.env.GOOGLE_CLIENT_ID || null,
+}));
 
 app.use('/api/auth', authRouter);
 app.use('/api/jobs', jobsRouter);

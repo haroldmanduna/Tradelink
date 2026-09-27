@@ -485,3 +485,10 @@ svg { display: block; }
 .cred-box > div + div { border-top: 1px solid var(--line); }
 .cred-box span { color: var(--muted); font-size: 13px; }
 .cred-box strong { font-family: var(--display); color: var(--ink-900); word-break: break-all; text-align: right; }
+
+/* Google sign-in */
+.or-divider { display: flex; align-items: center; text-align: center; color: var(--muted); font-size: 13px; margin: 18px 0 14px; }
+.or-divider::before, .or-divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.or-divider span { padding: 0 12px; }
+.gsi-wrap { display: flex; justify-content: center; }
+.gsi-wrap > div { color-scheme: light; }
