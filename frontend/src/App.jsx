@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from './auth.jsx';
 import { Logo, Icon } from './icons.jsx';
 import { Loading } from './components.jsx';
+import { api } from './api.js';
 import Landing from './pages/Landing.jsx';
 
 // Where each role lands after login / on "home".
@@ -22,6 +23,94 @@ import Admin from './pages/Admin.jsx';
 import Support from './pages/Support.jsx';
 import { Terms, Privacy, Cookies } from './pages/Legal.jsx';
 
+function timeAgo(iso) {
+  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60) return 'just now';
+  const m = Math.floor(s / 60);
+  if (m < 60) return m + 'm ago';
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + 'h ago';
+  const d = Math.floor(h / 24);
+  return d + 'd ago';
+}
+
+function NotificationsBell() {
+  const [items, setItems] = useState([]);
+  const [unread, setUnread] = useState(0);
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef(null);
+  const navigate = useNavigate();
+
+  async function load() {
+    try {
+      const data = await api.get('/notifications');
+      setItems(data.notifications || []);
+      setUnread(data.unread || 0);
+    } catch (_) { /* ignore transient errors */ }
+  }
+
+  useEffect(() => {
+    load();
+    const t = setInterval(load, 45000);
+    return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    function onDoc(e) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, []);
+
+  async function toggle() {
+    const next = !open;
+    setOpen(next);
+    if (next && unread > 0) {
+      setUnread(0);
+      setItems((prev) => prev.map((n) => ({ ...n, read: true })));
+      api.post('/notifications/read-all').catch(() => {});
+    }
+  }
+
+  function openItem(n) {
+    setOpen(false);
+    if (!n.read) api.post(`/notifications/${n.id}/read`).catch(() => {});
+    if (n.job_id) navigate(`/jobs/${n.job_id}`);
+  }
+
+  return (
+    <div className="notif" ref={wrapRef}>
+      <button className="notif-btn" onClick={toggle} aria-label="Notifications" title="Notifications">
+        <Icon name="bell" size={19} />
+        {unread > 0 && <span className="notif-badge">{unread > 9 ? '9+' : unread}</span>}
+      </button>
+      {open && (
+        <div className="notif-panel" role="menu">
+          <div className="notif-head">Notifications</div>
+          {items.length === 0 ? (
+            <div className="notif-empty">You're all caught up.</div>
+          ) : (
+            <ul className="notif-list">
+              {items.map((n) => (
+                <li
+                  key={n.id}
+                  className={`notif-item ${n.read ? '' : 'unread'} ${n.job_id ? 'clickable' : ''}`}
+                  onClick={() => openItem(n)}
+                >
+                  <div className="notif-title">{n.title}</div>
+                  {n.body && <div className="notif-body">{n.body}</div>}
+                  <div className="notif-time">{timeAgo(n.created_at)}</div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Nav() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -39,6 +128,7 @@ function Nav() {
             <span className="nav-user">
               <strong>{user.name}</strong> · {user.role === 'customer' ? 'Customer' : user.role === 'admin' ? (user.is_superadmin ? 'Superadmin' : 'Admin') : 'Tradesperson'}
             </span>
+            {user.role !== 'admin' && <NotificationsBell />}
             <Link className="btn secondary sm" to={homePath(user)}>
               {user.role === 'admin' ? 'Admin' : 'Dashboard'}
             </Link>

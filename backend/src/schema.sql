@@ -161,6 +161,29 @@ CREATE TABLE IF NOT EXISTS admin_actions (
 );
 CREATE INDEX IF NOT EXISTS idx_admin_actions_time ON admin_actions(created_at DESC);
 
+-- Notifications (in-app) + Web Push subscriptions ---------------------------
+CREATE TABLE IF NOT EXISTS notifications (
+  id         SERIAL PRIMARY KEY,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type       TEXT NOT NULL DEFAULT 'job_match',  -- 'job_match' | 'offer_made' | 'offer_accepted'
+  title      TEXT NOT NULL,
+  body       TEXT,
+  job_id     INTEGER REFERENCES jobs(id) ON DELETE CASCADE,
+  read       BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id         SERIAL PRIMARY KEY,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  endpoint   TEXT NOT NULL UNIQUE,
+  p256dh     TEXT NOT NULL,
+  auth       TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_push_user ON push_subscriptions(user_id);
+
 -- Supabase hardening ---------------------------------------------------------
 -- Our backend connects as the table OWNER (postgres role), which bypasses RLS,
 -- so the app keeps full access. Enabling RLS with NO policies means the public
@@ -171,7 +194,8 @@ DECLARE t text;
 BEGIN
   FOREACH t IN ARRAY ARRAY[
     'users','tradesperson_profiles','jobs','offers','ratings',
-    'credit_ledger','paynow_topups','support_messages','admin_actions'
+    'credit_ledger','paynow_topups','support_messages','admin_actions',
+    'notifications','push_subscriptions'
   ] LOOP
     IF EXISTS (SELECT 1 FROM information_schema.tables
               WHERE table_schema='public' AND table_name=t) THEN

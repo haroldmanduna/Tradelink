@@ -15,6 +15,7 @@ const { router: ratingsRouter } = require('./routes/ratings');
 const { router: miscRouter } = require('./routes/misc');
 const { router: walletRouter } = require('./routes/wallet');
 const { router: adminRouter } = require('./routes/admin');
+const { router: notificationsRouter } = require('./routes/notifications');
 const { apiLimiter, authLimiter, writeLimiter } = require('./ratelimit');
 
 const app = express();
@@ -34,6 +35,7 @@ app.get('/api/meta/categories', (req, res) => res.json({ categories: CATEGORIES 
 // Public runtime config for the frontend (e.g. Google sign-in client id).
 app.get('/api/meta/config', (req, res) => res.json({
   googleClientId: process.env.GOOGLE_CLIENT_ID || null,
+  vapidPublicKey: process.env.VAPID_PUBLIC_KEY || null,
 }));
 
 app.use('/api/auth', authRouter);
@@ -43,6 +45,7 @@ app.use('/api', ratingsRouter);  // /api/jobs/:id/rating
 app.use('/api', miscRouter);     // /api/profile, /api/stats, /api/support
 app.use('/api', walletRouter);   // /api/wallet, /api/wallet/topup, /api/paynow/result
 app.use('/api/admin', adminRouter);   // admin console: overview, users, jobs, reviews, complaints, actions
+app.use('/api', notificationsRouter); // /api/notifications, /api/push/subscribe
 
 // --- Serve frontend build in production (single-service deploy) ---
 const distDir = path.join(__dirname, '..', '..', 'frontend', 'dist');

@@ -4,6 +4,37 @@ import { api, CATEGORY_LABELS, tradeLabel } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { Stars, StatusBadge, Empty, Loading, StatBar, Alert, money, timeAgo } from '../components.jsx';
 import { TradeIcon, Icon } from '../icons.jsx';
+import { pushSupported, permissionState, enablePush } from '../push.js';
+
+function JobAlertsButton() {
+  const [state, setState] = useState(() => (pushSupported() ? permissionState() : 'unsupported'));
+  const [busy, setBusy] = useState(false);
+
+  if (state === 'unsupported') return null;
+
+  if (state === 'granted') {
+    return <span className="alerts-on"><Icon name="check" size={15} /> Job alerts on</span>;
+  }
+
+  async function turnOn() {
+    setBusy(true);
+    const res = await enablePush();
+    setBusy(false);
+    if (res.ok) setState('granted');
+    else if (res.reason === 'denied') setState('denied');
+    else if (res.reason === 'not-configured') alert('Push alerts are not available yet. Please try again later.');
+  }
+
+  if (state === 'denied') {
+    return <span className="alerts-on" style={{ color: 'var(--muted)' }} title="Enable notifications for this site in your browser settings"><Icon name="bell" size={15} /> Alerts blocked</span>;
+  }
+
+  return (
+    <button className="btn secondary sm alerts-cta" onClick={turnOn} disabled={busy}>
+      <Icon name="bell" size={16} /> {busy ? 'Enabling…' : 'Enable job alerts'}
+    </button>
+  );
+}
 
 export default function TradespersonDashboard() {
   const { user } = useAuth();
@@ -28,7 +59,10 @@ export default function TradespersonDashboard() {
             {user.profile?.verified && <span className="badge verified"><Icon name="verified" size={12} /> Verified</span>}
           </p>
         </div>
-        <Link className="btn secondary sm" to="/wallet"><Icon name="wallet" size={16} /> Credits</Link>
+        <div className="flex wrap" style={{ gap: 10 }}>
+          <JobAlertsButton />
+          <Link className="btn secondary sm" to="/wallet"><Icon name="wallet" size={16} /> Credits</Link>
+        </div>
       </div>
 
       {stats && (

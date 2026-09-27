@@ -2,6 +2,7 @@ const express = require('express');
 const { pool, query } = require('../db');
 const { requireAuth, requireRole, notSuspended } = require('../auth');
 const { CATEGORIES, JOB_TRANSITIONS } = require('../constants');
+const { notifyJobPosted } = require('../notify');
 
 const router = express.Router();
 
@@ -52,6 +53,8 @@ router.post('/', requireAuth, notSuspended, requireRole('customer'), async (req,
        VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
       [req.user.id, category, category === 'other' ? custom_category : null, description, location, budgetNum]
     );
+    // Alert matching tradespeople (in-app + web push). Never blocks the response.
+    notifyJobPosted(rows[0]).catch(() => {});
     return res.status(201).json({ job: shapeJob(rows[0]) });
   } catch (err) {
     return next(err);

@@ -3,7 +3,11 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import { AuthProvider } from './auth.jsx';
+import { registerServiceWorker } from './push.js';
 import './styles.css';
+
+// Register the PWA service worker (enables Web Push). No-op in unsupported envs.
+registerServiceWorker();
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

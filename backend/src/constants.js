@@ -32,6 +32,19 @@ const CATEGORIES = [
   'other',
 ];
 
+// Human-readable labels for categories (used in notification messages).
+const CATEGORY_LABELS = {
+  electrician: 'Electrician', plumber: 'Plumber', mechanic: 'Mechanic', handyman: 'Handyman',
+  carpenter: 'Carpenter', painter: 'Painter', welder: 'Welder', builder: 'Builder', tiler: 'Tiler',
+  roofer: 'Roofer', plasterer: 'Plasterer', landscaper: 'Gardener / Landscaper',
+  ac_technician: 'Fridge & AC Tech', solar: 'Solar Installer', borehole: 'Borehole & Pumps',
+  appliance_repair: 'Appliance Repair', locksmith: 'Locksmith', glazier: 'Glass & Windows',
+  pest_control: 'Pest Control', cleaner: 'Cleaning Services', movers: 'Movers & Removals',
+  it_tech: 'Computer & IT', security_installer: 'CCTV & Security', satellite: 'DSTV & Satellite',
+  generator_tech: 'Generator Tech', tailor: 'Tailor & Upholstery', panel_beater: 'Panel Beater & Spray',
+  tow_truck: 'Tow Truck', other: 'Other',
+};
+
 // --- Credits / billing -----------------------------------------------------
 // Wallet holds an integer credit balance. Bundles convert USD -> credits, with
 // small bonuses on larger bundles (kept deliberately cheap). Prices are USD.
@@ -77,6 +90,7 @@ const JOB_TRANSITIONS = {
 
 module.exports = {
   CATEGORIES,
+  CATEGORY_LABELS,
   JOB_STATUS,
   JOB_TRANSITIONS,
   CREDIT_BUNDLES,

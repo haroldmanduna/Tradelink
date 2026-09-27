@@ -226,6 +226,7 @@ export function Icon({ name, size = 18, className, style, ...rest }) {
     pin: <><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11Z" {...S} /><circle cx="12" cy="10" r="2.5" {...S} /></>,
     clock: <><circle cx="12" cy="12" r="9" {...S} /><path d="M12 7v5l3 2" {...S} /></>,
     chat: <path d="M4 5h16v11H8l-4 4V5Z" {...S} />,
+    bell: <><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z" {...S} /><path d="M10 20a2 2 0 0 0 4 0" {...S} /></>,
     doc: <><path d="M6 3h8l4 4v14H6V3Z" {...S} /><path d="M14 3v4h4M9 13h6M9 17h4" {...S} /></>,
     briefcase: <><rect x="3" y="7" width="18" height="13" rx="2" {...S} /><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18" {...S} /></>,
     play: <path d="M7 5l12 7-12 7V5Z" {...S} />,

@@ -1,6 +1,7 @@
 const express = require('express');
 const { pool, query } = require('../db');
 const { requireAuth, requireRole, notSuspended } = require('../auth');
+const { notifyOfferMade, notifyOfferAccepted } = require('../notify');
 
 const router = express.Router();
 
@@ -73,6 +74,8 @@ router.post('/jobs/:id/offers', requireAuth, notSuspended, requireRole('tradespe
       offer = ins.rows[0];
     }
     await client.query('COMMIT');
+    // Tell the customer they have a new offer (in-app + push).
+    notifyOfferMade(job.customer_id, job).catch(() => {});
     return res.status(201).json({
       offer: { ...offer, price: Number(offer.price) },
     });
@@ -121,6 +124,8 @@ router.post('/offers/:id/accept', requireAuth, notSuspended, requireRole('custom
       [offerId, offer.job_id]
     );
     await client.query('COMMIT');
+    // Tell the winning tradesperson their offer was accepted (in-app + push).
+    notifyOfferAccepted(offer.tradesperson_id, updJob.rows[0]).catch(() => {});
     return res.json({
       job: { ...updJob.rows[0], budget: Number(updJob.rows[0].budget) },
       accepted_offer_id: offerId,
