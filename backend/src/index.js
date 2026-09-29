@@ -1,84 +1,18 @@
 require('dotenv').config();
-const path = require('path');
-const fs = require('fs');
-const express = require('express');
-const cors = require('cors');
 
+const app = require('./app');
 const migrate = require('./migrate');
 const seedAdmin = require('./seedAdmin');
-const { pool } = require('./db');
-const { CATEGORIES } = require('./constants');
-const { router: authRouter } = require('./routes/auth');
-const { router: jobsRouter } = require('./routes/jobs');
-const { router: offersRouter } = require('./routes/offers');
-const { router: ratingsRouter } = require('./routes/ratings');
-const { router: miscRouter } = require('./routes/misc');
-const { router: walletRouter } = require('./routes/wallet');
-const { router: adminRouter } = require('./routes/admin');
-const { router: notificationsRouter } = require('./routes/notifications');
-const { apiLimiter, authLimiter, writeLimiter } = require('./ratelimit');
-
-const app = express();
-// Behind Render's proxy — needed so rate-limiting keys on the real client IP.
-app.set('trust proxy', 1);
-app.use(cors());
-app.use(express.json());
-
-// --- Rate limiting ---
-app.use('/api', apiLimiter);          // general cap on all API traffic
-app.use('/api/auth', authLimiter);    // stricter cap on auth endpoints
-app.use('/api/support', writeLimiter);
-
-// --- API routes ---
-app.get('/api/health', (req, res) => res.json({ ok: true, service: 'trustade', time: new Date().toISOString() }));
-app.get('/api/meta/categories', (req, res) => res.json({ categories: CATEGORIES }));
-// Public runtime config for the frontend (e.g. Google sign-in client id).
-app.get('/api/meta/config', (req, res) => res.json({
-  googleClientId: process.env.GOOGLE_CLIENT_ID || null,
-  vapidPublicKey: process.env.VAPID_PUBLIC_KEY || null,
-}));
-
-app.use('/api/auth', authRouter);
-app.use('/api/jobs', jobsRouter);
-app.use('/api', offersRouter);   // /api/jobs/:id/offers, /api/offers/:id/accept, /api/offers/mine
-app.use('/api', ratingsRouter);  // /api/jobs/:id/rating
-app.use('/api', miscRouter);     // /api/profile, /api/stats, /api/support
-app.use('/api', walletRouter);   // /api/wallet, /api/wallet/topup, /api/paynow/result
-app.use('/api/admin', adminRouter);   // admin console: overview, users, jobs, reviews, complaints, actions
-app.use('/api', notificationsRouter); // /api/notifications, /api/push/subscribe
-
-// --- Serve frontend build in production (single-service deploy) ---
-const distDir = path.join(__dirname, '..', '..', 'frontend', 'dist');
-if (fs.existsSync(distDir)) {
-  app.use(express.static(distDir));
-  app.get(/^(?!\/api).*/, (req, res) => {
-    res.sendFile(path.join(distDir, 'index.html'));
-  });
-}
-
-// --- 404 for unknown API routes ---
-app.use('/api', (req, res) => res.status(404).json({ error: 'Not found.' }));
-
-// --- Central error handler ---
-app.use((err, req, res, next) => {
-  console.error('ERROR:', err.message);
-  if (res.headersSent) return next(err);
-  res.status(500).json({ error: 'Internal server error.' });
-});
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 
-// Keep the free-tier instance warm so it doesn't spin down from inactivity
-// (Render free web services sleep after ~15 min without inbound traffic, which
-// causes a slow cold start on the next visit). We periodically hit our own
-// public health endpoint — that counts as inbound traffic and resets the idle
-// timer. RENDER_EXTERNAL_URL is injected automatically by Render in production.
-// Controls: KEEPALIVE=off disables it; KEEPALIVE_HOURS="5-23" limits pinging to
-// an active window in CAT (UTC+2) to conserve free monthly hours.
+// Keep a long-running host (e.g. Render free tier) warm so it doesn't spin down
+// from inactivity. Not used on serverless platforms like Vercel, where this
+// file's start() is never invoked.
 function setupKeepAlive() {
   const base = process.env.SELF_PING_URL || process.env.RENDER_EXTERNAL_URL;
   if (!base || process.env.KEEPALIVE === 'off' || typeof fetch !== 'function') return;
-  const INTERVAL_MS = 14 * 60 * 1000; // just under Render's ~15 min idle window
+  const INTERVAL_MS = 14 * 60 * 1000;
   const m = (process.env.KEEPALIVE_HOURS || '').match(/^(\d{1,2})-(\d{1,2})$/);
   const start = m ? +m[1] : null;
   const end = m ? +m[2] : null;

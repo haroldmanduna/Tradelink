@@ -1,7 +1,7 @@
 {
   "name": "trustade",
   "version": "1.0.0",
-  "description": "Trustade — two-sided marketplace connecting customers with local tradespeople in Bulawayo & Zvishavane, Zimbabwe.",
+  "description": "Trustade — two-sided marketplace connecting customers with local tradespeople in Zimbabwe.",
   "private": true,
   "scripts": {
     "build": "cd frontend && npm install && npm run build && cd ../backend && npm install",
@@ -9,7 +9,18 @@
     "migrate": "cd backend && npm run migrate",
     "test": "cd backend && node test/api.test.js"
   },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "google-auth-library": "^10.9.1",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.23.0",
+    "web-push": "^3.6.7"
+  },
   "engines": {
-    "node": ">=20"
+    "node": "24.x"
   }
 }

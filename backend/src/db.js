@@ -6,9 +6,17 @@ function buildConfig() {
   const url = process.env.DATABASE_URL;
   if (url) {
     const cfg = { connectionString: url };
-    // Render managed Postgres requires SSL. Allow disabling via PGSSL=disable for local URLs.
+    // Managed Postgres (Supabase/Render) requires SSL. Allow disabling via PGSSL=disable for local URLs.
     if (process.env.PGSSL !== 'disable' && !url.includes('localhost') && !url.includes('127.0.0.1') && !url.includes('/tmp')) {
       cfg.ssl = { rejectUnauthorized: false };
+    }
+    // On serverless (Vercel) each invocation is its own instance — keep a tiny
+    // pool per lambda and drop idle connections quickly so we don't exhaust the
+    // Supabase connection pooler under concurrency.
+    if (process.env.VERCEL) {
+      cfg.max = 1;
+      cfg.idleTimeoutMillis = 10000;
+      cfg.connectionTimeoutMillis = 10000;
     }
     return cfg;
   }
