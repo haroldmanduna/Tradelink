@@ -1,6 +1,6 @@
 const express = require('express');
 const crypto = require('crypto');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('../hash');
 const { OAuth2Client } = require('google-auth-library');
 const { pool, query } = require('../db');
 const { signToken, requireAuth } = require('../auth');

@@ -1,4 +1,4 @@
-const bcrypt = require('bcryptjs');
+const bcrypt = require('./hash');
 const { query } = require('./db');
 
 // Ensures exactly one superadmin exists, driven by environment variables.

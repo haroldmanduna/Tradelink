@@ -1,5 +1,5 @@
 const express = require('express');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('../hash');
 const { pool, query } = require('../db');
 const { requireAuth, requireAdmin, requireSuperadmin } = require('../auth');
 
